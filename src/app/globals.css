@@ -270,6 +270,81 @@ body {
   }
 }
 
+/* ---- Scroll-scrub primitives -------------------------------------
+   Every one of these reads the inherited --p (0 → 1) that the pinned
+   section writes on scroll, so the whole sequence is driven by one
+   number and re-renders nothing. --from/--to/--a/--b are plain numbers
+   set inline per element. ------------------------------------------- */
+
+/* Enters once, stays. */
+.cue {
+  --from: 0;
+  --to: 0.2;
+  --dy: 44px;
+  --dx: 0px;
+  --sc: 0.94;
+  --t: clamp(0, calc((var(--p, 0) - var(--from)) / (var(--to) - var(--from))), 1);
+  opacity: var(--t);
+  transform:
+    translate3d(calc(var(--dx) * (1 - var(--t))), calc(var(--dy) * (1 - var(--t))), 0)
+    scale(calc(var(--sc) + (1 - var(--sc)) * var(--t)));
+}
+
+/* Enters at --a, leaves at --b, over --f of the track. */
+.beat {
+  --a: 0;
+  --b: 1;
+  --f: 0.08;
+  --dy: 40px;
+  --dx: 0px;
+  --in: clamp(0, calc((var(--p, 0) - var(--a)) / var(--f)), 1);
+  --out: clamp(0, calc((var(--p, 0) - var(--b)) / var(--f)), 1);
+  opacity: calc(var(--in) * (1 - var(--out)));
+  transform: translate3d(
+    calc(var(--dx) * ((1 - var(--in)) - var(--out))),
+    calc(var(--dy) * ((1 - var(--in)) - var(--out))),
+    0
+  );
+}
+
+/* Cross-fading colour washes — opacity only. */
+.wash {
+  --a: 0;
+  --b: 1;
+  --f: 0.1;
+  --in: clamp(0, calc((var(--p, 0) - var(--a)) / var(--f)), 1);
+  --out: clamp(0, calc((var(--p, 0) - var(--b)) / var(--f)), 1);
+  opacity: calc(var(--in) * (1 - var(--out)));
+}
+
+/* Layers that drift at their own rate as the film runs. */
+.par {
+  --rate: 0px;
+  transform: translate3d(0, calc(var(--p, 0) * var(--rate)), 0);
+}
+
+/* The slow push-in that runs the whole length of the sequence. */
+.camera {
+  --zoom: 0.24;
+  transform: scale(calc(1 + var(--p, 0) * var(--zoom)));
+}
+
+/* Track height: how far you scroll to play the whole thing. */
+.hero-track {
+  height: calc(var(--beats) * 55svh + 100svh);
+}
+@media (min-width: 1024px) {
+  .hero-track {
+    height: calc(var(--beats) * 70svh + 100svh);
+  }
+}
+
+.process-track,
+.hero-track {
+  /* A pinned child must not be trapped by a transformed ancestor. */
+  transform: none;
+}
+
 /* Horizontal product rails */
 .rail {
   /* Flex, not `grid-auto-flow: column` — auto-sized grid columns give a

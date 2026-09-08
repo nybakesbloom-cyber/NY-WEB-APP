@@ -203,7 +203,7 @@ export default function Header() {
           <NavLink href="/shop?sort=price-asc">Under ₹999</NavLink>
           <NavLink href="/how-it-works">How it&apos;s made</NavLink>
 
-          <span className="ml-auto flex items-center gap-1.5 py-3 text-[0.78rem] font-medium text-gold-100/80">
+          <span className="ml-auto hidden shrink-0 items-center gap-1.5 whitespace-nowrap py-3 text-[0.78rem] font-medium text-gold-100/80 xl:flex">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold-400" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 2" strokeLinecap="round" />

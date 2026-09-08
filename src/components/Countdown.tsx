@@ -39,7 +39,7 @@ export default function Countdown({ className = "" }: { className?: string }) {
 
   return (
     <span className={className}>
-      {rolled === "1" ? "Tomorrow\u2019s same-day slot closes in " : "Same-day cut-off in "}
+      {rolled === "1" ? "Next same-day slot in " : "Same-day cut-off in "}
       <span className="font-mono font-bold tabular-nums text-gold-300">{clock}</span>
     </span>
   );

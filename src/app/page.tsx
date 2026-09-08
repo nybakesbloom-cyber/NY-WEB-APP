@@ -6,7 +6,7 @@ import Stars from "@/components/Stars";
 import Reveal from "@/components/Reveal";
 import Carousel from "@/components/Carousel";
 import FlowStrip from "@/components/FlowStrip";
-import HeroCarousel from "@/components/HeroCarousel";
+import HeroStory from "@/components/HeroStory";
 import ProcessScroll from "@/components/ProcessScroll";
 import { CATEGORIES, OCCASIONS, PRODUCTS, filterProducts } from "@/lib/catalog";
 
@@ -97,10 +97,10 @@ export default function HomePage() {
 
   return (
     <>
-      <HeroCarousel />
+      <HeroStory />
 
       {/* ------------------------------------------------------ CATEGORIES */}
-      <section className="wrap py-16">
+      <section id="start" className="wrap scroll-mt-[150px] py-16">
         <Reveal>
           <SectionHead
             eyebrow="Start here"

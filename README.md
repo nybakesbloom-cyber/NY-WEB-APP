@@ -29,10 +29,19 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 
 Everything animated is CSS; there is no animation library.
 
-- **Hero carousel** (`HeroCarousel.tsx`) — three slides on a 7s timer with a
-  Ken Burns push on the artwork, crossfaded layers, a progress bar per dot, and
-  arrows. It pauses on hover and on focus, and does not autoplay at all under
-  `prefers-reduced-motion`.
+- **Cinematic hero** (`HeroStory.tsx`) — the hero is a pinned title sequence you
+  scrub by scrolling. One number, `--p`, drives all of it in CSS: letterbox bars
+  close and retract, colour washes cross-fade dawn → kitchen → gold → night, the
+  headline builds a line at a time, four artwork frames cross-cut, a slow camera
+  push runs the whole length, stars and a skyline rise for the night beat, a
+  rider crosses the rooftops, and petals drift at their own parallax rates. Five
+  timestamped chapters (05:00 → 23:52) with a rail along the bottom.
+
+  At rest (`p = 0`) it is a complete, conventional hero — eyebrow, first line,
+  caption, artwork and both CTAs are already resolved, so a visitor who never
+  scrolls is not looking at an empty stage. There is a "Skip intro" jump to the
+  catalogue, and under `prefers-reduced-motion` it renders as a static hero with
+  no pinning.
 - **Scroll reveal** (`Reveal.tsx`) — the hidden state lives in CSS on
   `[data-reveal]`, so server HTML paints correctly and an IntersectionObserver
   only ever adds `data-shown`. Directions: `up`, `left`, `right`, `zoom`, with a
@@ -66,6 +75,12 @@ Two layout rules that are easy to break by accident:
 - `.rail` is **flex, not `grid-auto-flow: column`**. Auto-sized grid columns give
   a percentage width no containing block to resolve against and the cards
   collapse to a sliver.
+- The scrub primitives are three CSS classes — `.cue` (enters once), `.beat`
+  (enters at `--a`, leaves at `--b`) and `.wash` (opacity only) — plus `.par`
+  and `.camera`. Each reads the inherited `--p`, so a whole sequence is authored
+  by setting plain numbers inline and nothing re-renders.
+- Letterbox bars crop the frame, so stage content is inset by the bar height;
+  content that is not will be covered at the bottom.
 - `--p` is registered with `@property` as a `<number>` so the browser treats it
   as a real value rather than a token, and `calc()` on it stays cheap.
 - The mobile buy bar is **portalled to `<body>`**. A transformed ancestor — which
