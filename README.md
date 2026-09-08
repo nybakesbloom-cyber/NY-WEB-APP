@@ -22,6 +22,8 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 | `/cart` | Line editing, free delivery threshold, order summary |
 | `/checkout` | Sender, recipient, address, date, delivery slot, payment method, live totals |
 | `/order-confirmed` | Order number and a four-step delivery timeline |
+| `/how-it-works` | The five production stages, each linking to its own page |
+| `/how-it-works/[step]` | One stage in full: what happens, the numbers, what goes wrong |
 
 ## Motion
 
@@ -44,6 +46,14 @@ Everything animated is CSS; there is no animation library.
 - **Mini cart** (`CartDrawer.tsx`) — slide-over with a free-delivery progress
   bar, closes on Escape and locks body scroll. Adding from anywhere raises a
   toast (`CartToast.tsx`) rather than navigating away.
+- **Pinned process scrub** (`ProcessScroll.tsx`) — the home page's `How it is
+  actually made` section. A tall track holds a `sticky` full-height stage;
+  scrolling through the track writes `--p` (0 → 1) onto the stage, which drives
+  the rail fill and the travelling marker purely in CSS, while React advances the
+  phase copy and artwork. Each of the five phases links to its own detail page.
+  The track is one viewport of scrolling per phase on desktop and three quarters
+  on a phone (`.process-track`). Under `prefers-reduced-motion` it renders as a
+  plain stacked list instead of pinning.
 - **Chrome** — a gold scroll-progress hairline, a header that shrinks and casts
   a shadow once you scroll, a live countdown to the 6 PM same-day cut-off, and a
   pointer-tracking zoom on the product gallery.
@@ -56,6 +66,8 @@ Two layout rules that are easy to break by accident:
 - `.rail` is **flex, not `grid-auto-flow: column`**. Auto-sized grid columns give
   a percentage width no containing block to resolve against and the cards
   collapse to a sliver.
+- `--p` is registered with `@property` as a `<number>` so the browser treats it
+  as a real value rather than a token, and `calc()` on it stays cheap.
 - The mobile buy bar is **portalled to `<body>`**. A transformed ancestor — which
   is what `Reveal` is while it animates — becomes the containing block for
   `position: fixed` descendants, and the bar lands halfway down the page.
@@ -76,6 +88,12 @@ Two things about that file are deliberate and easy to undo by accident:
 - `hues[0]` colours the subject and `hues[1]` only tints the backdrop, which is
   washed towards white. Putting a pale tone in slot 0 is how you get white
   lilies; putting a dark one there gives you dark green ones.
+
+**Process content** — `src/lib/process.ts` holds the five stages: the standfirst
+used in the pinned stage, plus the intro, sections, numbers and the honest
+"what goes wrong here" paragraph used on each detail page. The five scene
+illustrations live in `src/components/art/ProcessScene.tsx`, same approach as the
+product art — generated SVG, no photography.
 
 **Catalogue** — `src/lib/catalog.ts` holds 24 products, 5 categories and 8
 occasions, plus `filterProducts()` and the delivery slots. It is the only place

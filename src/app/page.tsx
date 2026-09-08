@@ -7,6 +7,7 @@ import Reveal from "@/components/Reveal";
 import Carousel from "@/components/Carousel";
 import FlowStrip from "@/components/FlowStrip";
 import HeroCarousel from "@/components/HeroCarousel";
+import ProcessScroll from "@/components/ProcessScroll";
 import { CATEGORIES, OCCASIONS, PRODUCTS, filterProducts } from "@/lib/catalog";
 
 const PROMISES = [
@@ -172,6 +173,9 @@ export default function HomePage() {
           ))}
         </div>
       </section>
+
+      {/* ---------------------------------------- PINNED PROCESS SCRUB */}
+      <ProcessScroll />
 
       {/* ----------------------------------------------------- BESTSELLERS */}
       <section className="wrap py-16">

@@ -175,6 +175,14 @@ body {
  * Motion
  * ------------------------------------------------------------------ */
 
+/* Scroll progress through the pinned process section, 0 → 1. Registered so
+   the browser treats it as a number rather than a token soup. */
+@property --p {
+  syntax: "<number>";
+  inherits: true;
+  initial-value: 0;
+}
+
 /* Scroll-reveal. Elements start hidden and are released by an observer
    adding [data-shown]; without JS the .no-js fallback shows everything. */
 [data-reveal] {
@@ -249,6 +257,17 @@ body {
 .flow-mask {
   -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
   mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent);
+}
+
+/* The pinned process section: its height is how far you scroll to get
+   through it, so a phone gets a shorter run than a desktop. */
+.process-track {
+  height: calc(var(--steps) * 75svh + 100svh);
+}
+@media (min-width: 1024px) {
+  .process-track {
+    height: calc(var(--steps) * 100svh + 100svh);
+  }
 }
 
 /* Horizontal product rails */

@@ -201,6 +201,7 @@ export default function Header() {
           <NavLink href="/shop?category=plants">Plants</NavLink>
           <NavLink href="/shop?category=hampers">Hampers</NavLink>
           <NavLink href="/shop?sort=price-asc">Under ₹999</NavLink>
+          <NavLink href="/how-it-works">How it&apos;s made</NavLink>
 
           <span className="ml-auto flex items-center gap-1.5 py-3 text-[0.78rem] font-medium text-gold-100/80">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold-400" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -237,6 +238,12 @@ export default function Header() {
                 </Link>
               ))}
             </div>
+            <Link
+              href="/how-it-works"
+              className="mb-4 block rounded-lg bg-brand-800 px-3 py-2.5 text-sm font-semibold text-gold-100"
+            >
+              How it&apos;s made — all five stages
+            </Link>
             <p className="eyebrow mb-2">Occasions</p>
             <div className="grid grid-cols-2 gap-1.5">
               {OCCASIONS.map((o) => (

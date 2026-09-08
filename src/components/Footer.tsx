@@ -72,6 +72,11 @@ export default function Footer() {
             Help
           </h4>
           <ul className="space-y-2 text-sm text-gold-100/75">
+            <li>
+              <Link href="/how-it-works" className="transition hover:text-gold-300">
+                How it is made
+              </Link>
+            </li>
             {[
               "Track your order",
               "Delivery & slots",
