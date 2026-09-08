@@ -103,6 +103,16 @@ function Bloom({
       ))}
       <circle r={r * 0.34} fill={shade(fill, 26)} />
       <circle r={r * 0.2} fill={accent} />
+      {/* specular highlight — sells the petals as a rounded surface */}
+      <ellipse
+        cx={-r * 0.34}
+        cy={-r * 0.4}
+        rx={r * 0.26}
+        ry={r * 0.16}
+        fill="#FFFFFF"
+        opacity="0.32"
+        transform={`rotate(${-32 - rot})`}
+      />
     </g>
   );
 }
@@ -144,6 +154,15 @@ function Backdrop({ uid, tint }: { uid: string; tint: string }) {
           <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.95" />
           <stop offset="100%" stopColor="#FFFFFF" stopOpacity="0" />
         </radialGradient>
+        {/* One light source, up and to the left, for every piece. */}
+        <filter id={`cast-${uid}`} x="-25%" y="-25%" width="150%" height="150%">
+          <feDropShadow dx="-4" dy="12" stdDeviation="11" floodColor="#0B3D2E" floodOpacity="0.22" />
+        </filter>
+        <linearGradient id={`sheen-${uid}`} x1="0" y1="0" x2="0.9" y2="1">
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.34" />
+          <stop offset="55%" stopColor="#FFFFFF" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#000000" stopOpacity="0.1" />
+        </linearGradient>
       </defs>
       <rect width="400" height="400" fill={`url(#bg-${uid})`} />
       <circle cx="200" cy="168" r="132" fill={`url(#glow-${uid})`} />
@@ -224,6 +243,12 @@ function Cake({ uid, hues, rnd }: { uid: string; hues: [string, string]; rnd: nu
 
       {/* gold band */}
       <rect x="104" y="264" width="192" height="4" fill={GOLD} opacity="0.75" />
+
+      {/* glaze */}
+      <rect x="104" y="216" width="192" height="76" rx="8" fill={`url(#sheen-${uid})`} />
+      <rect x="142" y="150" width="116" height="66" rx="7" fill={`url(#sheen-${uid})`} />
+      <ellipse cx="146" cy="244" rx="12" ry="30" fill="#FFFFFF" opacity="0.12" />
+      <ellipse cx="168" cy="176" rx="8" ry="22" fill="#FFFFFF" opacity="0.12" />
     </g>
   );
 }
@@ -546,7 +571,7 @@ export default function ProductArt({
   return (
     <svg viewBox="0 0 400 400" className={className} role="img" aria-hidden="true">
       <Backdrop uid={uid} tint={tint} />
-      {body}
+      <g filter={`url(#cast-${uid})`}>{body}</g>
     </svg>
   );
 }

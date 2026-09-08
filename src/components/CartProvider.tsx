@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   useSyncExternalStore,
 } from "react";
@@ -29,6 +30,13 @@ type CartState = {
   setQty: (id: string, qty: number) => void;
   remove: (id: string) => void;
   clear: () => void;
+  /** Slide-over mini cart */
+  drawerOpen: boolean;
+  openDrawer: () => void;
+  closeDrawer: () => void;
+  /** The line most recently added, for the confirmation toast */
+  toast: CartLine | null;
+  dismissToast: () => void;
 };
 
 const CartContext = createContext<CartState | null>(null);
@@ -68,6 +76,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
    */
   const ready = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [stored, setLines] = useState<CartLine[]>(loadStored);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [toast, setToast] = useState<CartLine | null>(null);
+  const toastTimer = useRef<number | undefined>(undefined);
   const lines = ready ? stored : EMPTY;
 
   useEffect(() => {
@@ -81,6 +92,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const add = useCallback((line: Omit<CartLine, "id">) => {
     const id = lineId(line);
+    setToast({ ...line, id });
+    window.clearTimeout(toastTimer.current);
+    toastTimer.current = window.setTimeout(() => setToast(null), 4200);
     setLines((prev) => {
       const found = prev.find((l) => l.id === id);
       if (found) {
@@ -103,12 +117,35 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const clear = useCallback(() => setLines([]), []);
+  const openDrawer = useCallback(() => setDrawerOpen(true), []);
+  const closeDrawer = useCallback(() => setDrawerOpen(false), []);
+  const dismissToast = useCallback(() => setToast(null), []);
+
+  // The page behind the drawer must not scroll while it is open.
+  useEffect(() => {
+    if (!drawerOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [drawerOpen]);
+
+  useEffect(() => () => window.clearTimeout(toastTimer.current), []);
 
   const value = useMemo<CartState>(() => {
     const count = lines.reduce((n, l) => n + l.qty, 0);
     const subtotal = lines.reduce((n, l) => n + unitPrice(l) * l.qty, 0);
-    return { lines, ready, count, subtotal, add, setQty, remove, clear };
-  }, [lines, ready, add, setQty, remove, clear]);
+    return {
+      lines, ready, count, subtotal,
+      add, setQty, remove, clear,
+      drawerOpen, openDrawer, closeDrawer,
+      toast, dismissToast,
+    };
+  }, [
+    lines, ready, add, setQty, remove, clear,
+    drawerOpen, openDrawer, closeDrawer, toast, dismissToast,
+  ]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
 }

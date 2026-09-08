@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import Countdown from "./Countdown";
 import Logo from "./Logo";
 import { CATEGORIES, OCCASIONS } from "@/lib/catalog";
 import { useCart } from "./CartProvider";
@@ -20,7 +21,8 @@ function CartIcon({ className = "" }: { className?: string }) {
 }
 
 export default function Header() {
-  const { count, ready } = useCart();
+  const { count, ready, openDrawer } = useCart();
+  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<"cat" | "occ" | null>(null);
   const [city, setCity] = useState(CITIES[0]);
@@ -37,6 +39,13 @@ export default function Header() {
     setOpen(false);
     setMenu(null);
   }
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     function onClick(e: MouseEvent) {
@@ -68,8 +77,16 @@ export default function Header() {
         </div>
       </div>
 
-      <div className="border-b border-brand-800/10 bg-cream/95 backdrop-blur">
-        <div className="wrap flex h-[70px] items-center gap-4">
+      <div
+        className={`border-b border-brand-800/10 bg-cream/92 backdrop-blur-md transition-shadow duration-300 ${
+          scrolled ? "shadow-[0_14px_30px_-24px_rgba(11,61,46,0.85)]" : ""
+        }`}
+      >
+        <div
+          className={`wrap flex items-center gap-4 transition-[height] duration-300 ${
+            scrolled ? "h-[58px]" : "h-[70px]"
+          }`}
+        >
           <button
             className="-ml-1 rounded-lg p-2 text-brand-800 lg:hidden"
             onClick={() => setOpen((v) => !v)}
@@ -129,18 +146,22 @@ export default function Header() {
             </select>
           </label>
 
-          <Link
-            href="/cart"
-            className="relative ml-auto flex items-center gap-2 rounded-full border border-brand-800/12 bg-white px-3.5 py-2 text-sm font-semibold text-brand-800 transition hover:border-gold-500 md:ml-2"
+          <button
+            onClick={openDrawer}
+            aria-label={`Open cart, ${count} ${count === 1 ? "item" : "items"}`}
+            className="relative ml-auto flex items-center gap-2 rounded-full border border-brand-800/12 bg-white px-3.5 py-2 text-sm font-semibold text-brand-800 transition hover:-translate-y-0.5 hover:border-gold-500 hover:shadow-[0_10px_22px_-14px_rgba(11,61,46,0.9)] md:ml-2"
           >
             <CartIcon className="h-5 w-5" />
             <span className="hidden sm:inline">Cart</span>
             {ready && count > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-gold-500 px-1 text-[0.68rem] font-bold text-brand-900">
+              <span
+                key={count}
+                className="pop-in absolute -right-1.5 -top-1.5 grid h-5 min-w-5 place-items-center rounded-full bg-gold-500 px-1 text-[0.68rem] font-bold text-brand-900"
+              >
                 {count}
               </span>
             )}
-          </Link>
+          </button>
         </div>
       </div>
 
@@ -181,12 +202,12 @@ export default function Header() {
           <NavLink href="/shop?category=hampers">Hampers</NavLink>
           <NavLink href="/shop?sort=price-asc">Under ₹999</NavLink>
 
-          <span className="ml-auto flex items-center gap-1.5 py-3 text-[0.78rem] font-medium text-gold-300">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+          <span className="ml-auto flex items-center gap-1.5 py-3 text-[0.78rem] font-medium text-gold-100/80">
+            <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold-400" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 2" strokeLinecap="round" />
             </svg>
-            Same-day &amp; midnight delivery
+            <Countdown />
           </span>
         </div>
       </div>

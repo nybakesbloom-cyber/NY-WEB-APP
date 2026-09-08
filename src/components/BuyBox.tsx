@@ -1,13 +1,17 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { useCart } from "./CartProvider";
 import { money } from "@/lib/format";
 import { FREE_DELIVERY_OVER, productPrice, type Product } from "@/lib/catalog";
 
+const noopSubscribe = () => () => {};
+
 export default function BuyBox({ product }: { product: Product }) {
   const { add } = useCart();
+  const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const router = useRouter();
 
   const [variant, setVariant] = useState(product.variants[0].label);
@@ -145,13 +149,43 @@ export default function BuyBox({ product }: { product: Product }) {
       </div>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button onClick={addToCart} className={`btn flex-1 px-6 py-3.5 ${added ? "btn-emerald" : "btn-outline"}`}>
+        <button
+          onClick={addToCart}
+          className={`btn flex-1 px-6 py-3.5 transition-transform hover:-translate-y-0.5 ${
+            added ? "btn-emerald" : "btn-outline"
+          }`}
+        >
           {added ? "Added to cart ✓" : "Add to cart"}
         </button>
-        <button onClick={buyNow} className="btn btn-gold flex-1 px-6 py-3.5">
-          Buy now
+        <button onClick={buyNow} className="btn btn-gold sheen flex-1 px-6 py-3.5">
+          <span className="relative z-10">Buy now</span>
         </button>
       </div>
+
+      {/* Phone-sized screens keep the price and the action in reach. Portalled
+          to <body> so no transformed ancestor can capture the fixed position. */}
+      {mounted &&
+        createPortal(
+          <div className="fixed inset-x-0 bottom-0 z-40 flex items-center gap-3 border-t border-brand-800/10 bg-cream/95 px-4 py-3 backdrop-blur-md md:hidden">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-[0.72rem] text-brand-700/65">
+                {variant}
+                {flavour ? ` · ${flavour}` : ""}
+              </p>
+              <p className="font-display text-lg font-semibold leading-none text-brand-900">
+                {money(price * qty)}
+              </p>
+            </div>
+            <button onClick={addToCart} className="btn btn-outline px-4 py-2.5 text-[0.82rem]">
+              {added ? "Added ✓" : "Add"}
+            </button>
+            <button onClick={buyNow} className="btn btn-gold px-5 py-2.5 text-[0.82rem]">
+              Buy now
+            </button>
+          </div>,
+          document.body,
+        )}
+      <div className="h-16 md:hidden" aria-hidden="true" />
     </div>
   );
 }

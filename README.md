@@ -23,6 +23,43 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 | `/checkout` | Sender, recipient, address, date, delivery slot, payment method, live totals |
 | `/order-confirmed` | Order number and a four-step delivery timeline |
 
+## Motion
+
+Everything animated is CSS; there is no animation library.
+
+- **Hero carousel** (`HeroCarousel.tsx`) — three slides on a 7s timer with a
+  Ken Burns push on the artwork, crossfaded layers, a progress bar per dot, and
+  arrows. It pauses on hover and on focus, and does not autoplay at all under
+  `prefers-reduced-motion`.
+- **Scroll reveal** (`Reveal.tsx`) — the hidden state lives in CSS on
+  `[data-reveal]`, so server HTML paints correctly and an IntersectionObserver
+  only ever adds `data-shown`. Directions: `up`, `left`, `right`, `zoom`, with a
+  `delay` for staggering a row.
+- **Flowing image ribbons** (`FlowStrip.tsx`) — two rows of product art drifting
+  in opposite directions. The track holds the list twice and translates exactly
+  `-50%`, so the loop is seamless; hovering pauses it and the edges are masked.
+- **Product carousels** (`Carousel.tsx`) — native overflow scrolling with CSS
+  scroll snap, so it drags on touch and keeps keyboard behaviour. The arrows
+  disable themselves at each end.
+- **Mini cart** (`CartDrawer.tsx`) — slide-over with a free-delivery progress
+  bar, closes on Escape and locks body scroll. Adding from anywhere raises a
+  toast (`CartToast.tsx`) rather than navigating away.
+- **Chrome** — a gold scroll-progress hairline, a header that shrinks and casts
+  a shadow once you scroll, a live countdown to the 6 PM same-day cut-off, and a
+  pointer-tracking zoom on the product gallery.
+
+Every one of these is switched off by the `prefers-reduced-motion` block at the
+bottom of `globals.css`.
+
+Two layout rules that are easy to break by accident:
+
+- `.rail` is **flex, not `grid-auto-flow: column`**. Auto-sized grid columns give
+  a percentage width no containing block to resolve against and the cards
+  collapse to a sliver.
+- The mobile buy bar is **portalled to `<body>`**. A transformed ancestor — which
+  is what `Reveal` is while it animates — becomes the containing block for
+  `position: fixed` descendants, and the bar lands halfway down the page.
+
 ## How it is put together
 
 **No image files.** Every product picture is generated SVG —
@@ -44,7 +81,8 @@ Two things about that file are deliberate and easy to undo by accident:
 occasions, plus `filterProducts()` and the delivery slots. It is the only place
 to edit to change what the shop sells.
 
-**Cart** — `src/components/CartProvider.tsx`, React context over `localStorage`.
+**Cart** — `src/components/CartProvider.tsx`, React context over `localStorage`,
+also holding the drawer and toast state.
 The server has no cart, so the first client render deliberately shows an empty
 one and reveals storage on the next pass (via `useSyncExternalStore`); that gate
 is what keeps hydration clean. Lines are keyed by slug + variant + flavour +

@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import SortSelect from "@/components/SortSelect";
+import Reveal from "@/components/Reveal";
 import { CATEGORIES, OCCASIONS, filterProducts } from "@/lib/catalog";
 
 const PRICE_BANDS = [
@@ -165,7 +166,9 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
           ) : (
             <div className="grid grid-cols-2 gap-4 xl:grid-cols-3">
               {products.map((p, i) => (
-                <ProductCard key={p.slug} product={p} index={i} />
+                <Reveal key={p.slug} from="up" delay={(i % 3) * 90}>
+                  <ProductCard product={p} />
+                </Reveal>
               ))}
             </div>
           )}

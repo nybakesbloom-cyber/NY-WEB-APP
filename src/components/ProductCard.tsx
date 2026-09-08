@@ -8,7 +8,7 @@ import { useCart } from "./CartProvider";
 import { money, discountPct } from "@/lib/format";
 import type { Product } from "@/lib/catalog";
 
-export default function ProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+export default function ProductCard({ product }: { product: Product }) {
   const { add } = useCart();
   const [added, setAdded] = useState(false);
   const off = discountPct(product.price, product.mrp);
@@ -28,8 +28,7 @@ export default function ProductCard({ product, index = 0 }: { product: Product; 
   return (
     <Link
       href={`/product/${product.slug}`}
-      className="card group animate-rise flex flex-col"
-      style={{ animationDelay: `${Math.min(index, 8) * 45}ms` }}
+      className="card group flex h-full flex-col"
     >
       <div className="relative">
         <ProductArt

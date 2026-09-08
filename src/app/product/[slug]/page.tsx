@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import ProductArt from "@/components/art/ProductArt";
 import ProductCard from "@/components/ProductCard";
 import BuyBox from "@/components/BuyBox";
+import ProductGallery from "@/components/ProductGallery";
+import Reveal from "@/components/Reveal";
+import Carousel from "@/components/Carousel";
 import Stars from "@/components/Stars";
 import SectionHead from "@/components/SectionHead";
 import { CATEGORIES, OCCASIONS, PRODUCTS, getProduct } from "@/lib/catalog";
@@ -59,32 +61,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
       <div className="wrap grid gap-10 py-10 lg:grid-cols-2 lg:gap-14">
         {/* --------------------------------------------------------- media */}
         <div className="lg:sticky lg:top-[150px] lg:self-start">
-          <div className="overflow-hidden rounded-2xl border border-brand-800/10 bg-white">
-            <ProductArt kind={product.art} hues={product.hues} seed={product.slug} className="w-full" />
-          </div>
-          <div className="mt-3 grid grid-cols-4 gap-3">
-            {[product.hues, [product.hues[1], product.hues[0]], category.hues, ["#0B3D2E", "#EBD489"]].map(
-              (h, i) => (
-                <div
-                  key={i}
-                  className={`overflow-hidden rounded-xl border bg-white ${
-                    i === 0 ? "border-gold-500" : "border-brand-800/10"
-                  }`}
-                >
-                  <ProductArt
-                    kind={i === 3 ? category.art : product.art}
-                    hues={h as [string, string]}
-                    seed={`${product.slug}-${i}`}
-                    className="w-full"
-                  />
-                </div>
-              ),
-            )}
-          </div>
+          <ProductGallery product={product} category={category} />
         </div>
 
         {/* --------------------------------------------------------- detail */}
-        <div>
+        <Reveal from="right">
           <div className="flex flex-wrap items-center gap-2">
             {product.bestseller && (
               <span className="rounded-full bg-brand-800 px-3 py-1 text-[0.62rem] font-bold uppercase tracking-[0.16em] text-gold-200">
@@ -181,21 +162,25 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               );
             })}
           </div>
-        </div>
+        </Reveal>
       </div>
 
       {related.length > 0 && (
         <section className="wrap pb-4 pt-10">
-          <SectionHead
-            eyebrow="Ordered together"
-            title="People also sent"
-            href={`/shop?category=${category.slug}`}
-          />
-          <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-            {related.map((p, i) => (
-              <ProductCard key={p.slug} product={p} index={i} />
-            ))}
-          </div>
+          <Reveal>
+            <SectionHead
+              eyebrow="Ordered together"
+              title="People also sent"
+              href={`/shop?category=${category.slug}`}
+            />
+          </Reveal>
+          <Reveal from="right">
+            <Carousel label="related products">
+              {related.map((p) => (
+                <ProductCard key={p.slug} product={p} />
+              ))}
+            </Carousel>
+          </Reveal>
         </section>
       )}
     </>
