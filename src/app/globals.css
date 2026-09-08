@@ -1,26 +1,172 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  /* Emerald — the house colour */
+  --color-brand-50:  #F2F8F4;
+  --color-brand-100: #DCEDE4;
+  --color-brand-200: #B9DCC9;
+  --color-brand-300: #8CC4A9;
+  --color-brand-400: #4EA37F;
+  --color-brand-500: #1C8560;
+  --color-brand-600: #14684A;
+  --color-brand-700: #0F5138;
+  --color-brand-800: #0B3D2E;
+  --color-brand-900: #06281D;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  /* Gold — the trim */
+  --color-gold-50:  #FDFAF0;
+  --color-gold-100: #F7EFD6;
+  --color-gold-200: #F0E1B4;
+  --color-gold-300: #EBD489;
+  --color-gold-400: #DFBF4F;
+  --color-gold-500: #C9A227;
+  --color-gold-600: #B08918;
+  --color-gold-700: #8A6A16;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Neutrals */
+  --color-cream: #FBF8F1;
+  --color-ink: #12211B;
+
+  --font-display: var(--font-display), "Iowan Old Style", "Palatino Linotype", Georgia, serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --animate-rise: rise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade: fade 0.5s ease both;
+
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(18px); }
+    to   { opacity: 1; transform: none; }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+    to   { opacity: 1; }
   }
 }
 
+:root {
+  color-scheme: light;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  .wrap {
+    width: 100%;
+    max-width: 1240px;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+  }
+
+  /* Thin gold rule used under section headings */
+  .gold-rule {
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--color-gold-400) 20%,
+      var(--color-gold-500) 50%,
+      var(--color-gold-400) 80%,
+      transparent
+    );
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 9999px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    transition: transform 0.15s ease, background-color 0.2s ease, color 0.2s ease,
+      box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .btn:active { transform: translateY(1px); }
+  .btn:disabled { opacity: 0.45; pointer-events: none; }
+
+  .btn-gold {
+    background: linear-gradient(135deg, var(--color-gold-400), var(--color-gold-600));
+    color: var(--color-brand-900);
+    box-shadow: 0 6px 18px -8px rgba(176, 137, 24, 0.9);
+  }
+  .btn-gold:hover { filter: brightness(1.06); }
+
+  .btn-emerald {
+    background: var(--color-brand-800);
+    color: var(--color-gold-100);
+  }
+  .btn-emerald:hover { background: var(--color-brand-700); }
+
+  .btn-outline {
+    border: 1px solid var(--color-brand-200);
+    background: #fff;
+    color: var(--color-brand-800);
+  }
+  .btn-outline:hover {
+    border-color: var(--color-gold-500);
+    color: var(--color-brand-900);
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid rgba(11, 61, 46, 0.08);
+    border-radius: 1rem;
+    overflow: hidden;
+    transition: box-shadow 0.25s ease, transform 0.25s ease, border-color 0.25s ease;
+  }
+  .card:hover {
+    box-shadow: 0 24px 44px -28px rgba(11, 61, 46, 0.45);
+    border-color: rgba(201, 162, 39, 0.55);
+    transform: translateY(-3px);
+  }
+
+  .eyebrow {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-gold-600);
+  }
+
+  .field {
+    width: 100%;
+    border-radius: 0.65rem;
+    border: 1px solid rgba(11, 61, 46, 0.16);
+    background: #fff;
+    padding: 0.7rem 0.9rem;
+    font-size: 0.925rem;
+    outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .field:focus {
+    border-color: var(--color-gold-500);
+    box-shadow: 0 0 0 3px rgba(223, 191, 79, 0.28);
+  }
+}
+
+/* Marquee for the trust bar */
+@keyframes slide-left {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track {
+  animation: slide-left 28s linear infinite;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track { animation: none; }
+  * { animation-duration: 0.001ms !important; }
+}
+
+::selection {
+  background: var(--color-gold-300);
+  color: var(--color-brand-900);
 }
