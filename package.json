@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "seed": "node --no-warnings --experimental-strip-types scripts/seed.ts",
-    "make-admin": "node --no-warnings --experimental-strip-types scripts/make-admin.ts"
+    "make-admin": "node --no-warnings --experimental-strip-types scripts/make-admin.ts",
+    "set-admin-password": "node --no-warnings --experimental-strip-types scripts/set-admin-password.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

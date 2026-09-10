@@ -84,6 +84,19 @@ into Atlas → Browse Collections → `adminusers` → Insert Document, or use t
 `mongosh` line it also prints. The hash is salted, so the same password yields a
 different string each run; that is expected.
 
+**Resetting a password, or adding an account that writes.** `make-admin` only
+prints; `set-admin-password` writes to whatever `MONGODB_URI` points at. It
+creates the account if it does not exist, resets the password if it does, reads
+the hash back to confirm the write landed, and lists every staff account in that
+database:
+
+```bash
+read -rs "?New password: " ADMIN_PASSWORD; echo
+ADMIN_EMAIL=you@shop.com ADMIN_PASSWORD="$ADMIN_PASSWORD" npm run set-admin-password
+```
+
+Point `MONGODB_URI` at production to reset a password there.
+
 **Getting data in without a terminal.** A fresh database has no staff account,
 so `/admin/login` offers to create the first one — and refuses the moment any
 account exists, so it closes itself permanently after one use. From there,
