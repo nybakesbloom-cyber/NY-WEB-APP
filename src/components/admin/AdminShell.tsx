@@ -9,6 +9,7 @@ import type { Session } from "@/server/session";
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: "grid", exact: true },
   { href: "/admin/orders", label: "Orders", icon: "box" },
+  { href: "/admin/customers", label: "Customers", icon: "people" },
   { href: "/admin/billing", label: "Billing", icon: "rupee" },
   { href: "/admin/products", label: "Products", icon: "tag" },
   { href: "/admin/content", label: "Site content", icon: "text" },
@@ -27,6 +28,7 @@ function Icon({ name }: { name: string }) {
       {name === "text" && <><path d="M4 6h16M4 11h16M4 16h10" /></>}
       {name === "image" && <><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" /><circle cx="8.6" cy="9.6" r="1.8" /><path d="m4 16 4.6-4.2L20 19" /></>}
       {name === "upload" && <><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15" /><path d="M12 4v11M8 8l4-4 4 4" /></>}
+      {name === "people" && <><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" /><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 14.8c2.1.7 3.5 2.6 3.5 5.2" /></>}
     </svg>
   );
 }
@@ -41,6 +43,8 @@ export default function AdminShell({
   const pathname = usePathname();
   const router = useRouter();
   const [open, setOpen] = useState(false);
+  // Collapsed keeps the icons and drops the labels, so the rail stays usable.
+  const [collapsed, setCollapsed] = useState(false);
 
   async function signOut() {
     await fetch("/api/admin/auth/logout", { method: "POST" });
@@ -49,16 +53,40 @@ export default function AdminShell({
   }
 
   return (
-    <div className="lg:grid lg:min-h-screen lg:grid-cols-[268px_1fr]">
+    <div
+      className={`lg:grid lg:min-h-screen ${
+        collapsed ? "lg:grid-cols-[76px_1fr]" : "lg:grid-cols-[268px_1fr]"
+      } transition-[grid-template-columns] duration-200`}
+    >
       <aside
         className={`z-40 flex flex-col bg-brand-900 lg:sticky lg:top-0 lg:h-screen ${
           open ? "" : "max-lg:hidden"
         }`}
       >
-        <div className="border-b border-gold-400/15 px-4 py-4">
-          <Link href="/admin" className="block">
-            <Logo tone="dark" />
-          </Link>
+        <div className="flex items-center gap-2 border-b border-gold-400/15 px-4 py-4">
+          {collapsed ? (
+            <Link href="/admin" aria-label="Dashboard" className="mx-auto">
+              <svg viewBox="0 0 48 48" className="h-9 w-9" aria-hidden="true">
+                <circle cx="24" cy="24" r="22" fill="none" stroke="#C9A227" strokeWidth="1.6" />
+                <path d="M24 34c-6 0-10-4-10-9 0-4 3-7 6-7 2 0 4 1 4 3 0-2 2-3 4-3 3 0 6 3 6 7 0 5-4 9-10 9Z" fill="#C9A227" />
+              </svg>
+            </Link>
+          ) : (
+            <Link href="/admin" className="block min-w-0">
+              <Logo tone="dark" />
+            </Link>
+          )}
+          <button
+            onClick={() => setCollapsed((v) => !v)}
+            aria-label={collapsed ? "Expand the menu" : "Collapse the menu"}
+            aria-expanded={!collapsed}
+            title={collapsed ? "Expand the menu" : "Collapse the menu"}
+            className="ml-auto hidden shrink-0 rounded-lg p-1.5 text-gold-200/70 transition hover:bg-brand-800 hover:text-gold-100 lg:block"
+          >
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M4 7h16M4 12h16M4 17h16" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
 
         <nav className="flex-1 space-y-1 p-3">
@@ -71,20 +99,23 @@ export default function AdminShell({
                 key={item.href}
                 href={item.href}
                 onClick={() => setOpen(false)}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-[0.88rem] font-medium transition ${
+                title={collapsed ? item.label : undefined}
+                className={`flex items-center gap-3 rounded-lg py-2.5 text-[0.88rem] font-medium transition ${
+                  collapsed ? "justify-center px-2" : "px-3"
+                } ${
                   active
                     ? "bg-gold-500 text-brand-900"
                     : "text-gold-100/70 hover:bg-brand-800 hover:text-gold-100"
                 }`}
               >
                 <Icon name={item.icon} />
-                {item.label}
+                {!collapsed && item.label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="border-t border-gold-400/15 p-4">
+        <div className={`border-t border-gold-400/15 p-4 ${collapsed ? "lg:hidden" : ""}`}>
           <p className="truncate text-[0.78rem] font-semibold text-gold-100">{session.name}</p>
           <p className="truncate text-[0.7rem] text-gold-100/50">{session.email}</p>
           <span className="mt-1.5 inline-block rounded-full bg-brand-800 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-gold-300">
@@ -106,6 +137,21 @@ export default function AdminShell({
           </div>
         </div>
       </aside>
+
+      {collapsed && (
+        <div className="hidden border-t border-gold-400/15 p-3 lg:block" style={{ gridColumn: 1 }}>
+          <button
+            onClick={signOut}
+            title="Sign out"
+            aria-label="Sign out"
+            className="grid h-9 w-full place-items-center rounded-lg border border-gold-400/30 text-gold-200 hover:bg-brand-800"
+          >
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+              <path d="M15 17l5-5-5-5M20 12H9M12 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </button>
+        </div>
+      )}
 
       <div className="min-w-0">
         <div className="flex items-center gap-3 border-b border-brand-900/10 bg-white px-4 py-3 lg:hidden">

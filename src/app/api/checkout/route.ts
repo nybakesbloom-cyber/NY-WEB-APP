@@ -4,6 +4,9 @@ import { Order } from "@/server/models/Order";
 import { Transaction } from "@/server/models/Transaction";
 import { Content } from "@/server/models/Content";
 import { json, fail } from "@/server/api";
+import { recomputePayment } from "@/server/payments";
+import { nextOrderNumber } from "@/server/orderNumber";
+import { phoneKey } from "@/lib/orders";
 
 type IncomingLine = {
   slug: string;
@@ -19,13 +22,6 @@ const SLOT_FEES: Record<string, number> = {
   midnight: 250,
   early: 200,
 };
-
-async function nextNumber(prefix: string) {
-  // Small shop, low volume: a count plus a random tail is enough to stay unique
-  // without a counters collection, and the unique index is the real guard.
-  const n = await Order.estimatedDocumentCount();
-  return `${prefix}${100000 + n + Math.floor(Math.random() * 900)}`;
-}
 
 export async function POST(req: Request) {
   try {
@@ -79,7 +75,7 @@ export async function POST(req: Request) {
     }
 
     const total = subtotal + deliveryFee + slotFee + codFee;
-    const number = await nextNumber(prefix);
+    const number = await nextOrderNumber(prefix);
 
     const order = await Order.create({
       number,
@@ -90,6 +86,7 @@ export async function POST(req: Request) {
       codFee,
       total,
       sender: input.sender ?? {},
+      phoneKey: phoneKey(input.sender?.phone),
       recipient: input.recipient ?? {},
       address: input.address ?? {},
       deliveryDate: String(input.deliveryDate ?? ""),
@@ -111,6 +108,7 @@ export async function POST(req: Request) {
       reference: `WEB-${number}`,
     });
 
+    await recomputePayment(number);
     return json({ ok: true, number, total }, 201);
   } catch (err) {
     console.error("[checkout]", err);

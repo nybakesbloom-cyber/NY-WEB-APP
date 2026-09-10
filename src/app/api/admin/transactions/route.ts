@@ -1,5 +1,6 @@
 import { Transaction } from "@/server/models/Transaction";
 import { TXN_STATUSES } from "@/lib/orders";
+import { recomputePayment } from "@/server/payments";
 import { Order } from "@/server/models/Order";
 import { withAdmin, body, query, json, fail, paging, findPaged } from "@/server/api";
 
@@ -104,5 +105,6 @@ export const POST = withAdmin(async ({ req, session }) => {
     note: input.note ? `${input.note} (${session.email})` : `by ${session.email}`,
   });
 
-  return json({ item: txn }, 201);
+  const payment = await recomputePayment(order.number);
+  return json({ item: txn, payment }, 201);
 });

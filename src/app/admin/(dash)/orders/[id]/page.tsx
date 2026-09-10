@@ -3,13 +3,19 @@
 import Link from "next/link";
 import { use, useState } from "react";
 import { money } from "@/lib/format";
-import { NEXT_STATUS, STATUS_LABEL, type OrderStatus } from "@/lib/orders";
+import {
+  nextStatuses, STATUS_LABEL, CHANNEL_LABEL, PAYMENT_LABEL,
+  type OrderStatus, type Channel, type PaymentStatus,
+} from "@/lib/orders";
 import { useApi, send, PageHead, Panel, Badge, Field, Loading, ErrorBox } from "@/components/admin/ui";
 
 type Order = {
   _id: string;
   number: string;
   status: OrderStatus;
+  channel: Channel;
+  paymentStatus: PaymentStatus;
+  amountPaid: number;
   lines: { slug: string; name: string; variant: string; flavour: string; message: string; qty: number; unitPrice: number }[];
   subtotal: number; deliveryFee: number; slotFee: number; codFee: number; total: number;
   sender: { name: string; phone: string; email: string };
@@ -41,7 +47,7 @@ export default function OrderDetail({ params }: { params: Promise<{ id: string }
   if (!data) return null;
 
   const o = data.item;
-  const allowed = NEXT_STATUS[o.status] ?? [];
+  const allowed = nextStatuses(o.status, o.channel);
 
   async function move(status: OrderStatus) {
     setBusy(true);
@@ -87,6 +93,10 @@ export default function OrderDetail({ params }: { params: Promise<{ id: string }
       <Panel className="mb-4">
         <div className="flex flex-wrap items-center gap-3">
           <Badge value={o.status} label={STATUS_LABEL[o.status]} />
+          <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus]} />
+          <span className="rounded-full border border-brand-900/12 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.1em] text-brand-700">
+            {CHANNEL_LABEL[o.channel] ?? "Online"}
+          </span>
           {allowed.length === 0 ? (
             <span className="text-[0.84rem] text-brand-700/60">
               This order is final — nothing more to do.
@@ -150,6 +160,13 @@ export default function OrderDetail({ params }: { params: Promise<{ id: string }
               <div className="flex justify-between border-t border-brand-900/8 pt-2">
                 <dt className="font-display text-base font-semibold text-brand-900">Total</dt>
                 <dd className="font-display text-lg font-semibold text-brand-900">{money(o.total)}</dd>
+              </div>
+              <div className="flex justify-between">
+                <dt className="text-brand-700/75">Collected</dt>
+                <dd className={o.amountPaid >= o.total ? "font-semibold text-emerald-700" : "font-semibold text-amber-700"}>
+                  {money(o.amountPaid ?? 0)}
+                  {o.amountPaid < o.total && ` · ${money(o.total - (o.amountPaid ?? 0))} outstanding`}
+                </dd>
               </div>
             </dl>
           </Panel>

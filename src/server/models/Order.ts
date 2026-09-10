@@ -6,12 +6,16 @@ const { Schema, model, models } = mongoose;
 // scripts/seed.ts under plain Node, which cannot resolve @/.
 export {
   ORDER_STATUSES,
-  NEXT_STATUS,
   STATUS_LABEL,
+  nextStatuses,
   type OrderStatus,
 } from "../../lib/orders.ts";
 
-import { ORDER_STATUSES as STATUSES } from "../../lib/orders.ts";
+import {
+  ORDER_STATUSES as STATUSES,
+  CHANNELS,
+  PAYMENT_STATUSES,
+} from "../../lib/orders.ts";
 
 const LineSchema = new Schema(
   {
@@ -54,6 +58,16 @@ const OrderSchema = new Schema(
       pin: { type: String, default: "" },
       landmark: { type: String, default: "" },
     },
+
+    /** Last ten digits of the sender's mobile; groups repeat customers. */
+    phoneKey: { type: String, default: "", index: true },
+
+    /** How the order was taken. A counter sale is collected, not delivered. */
+    channel: { type: String, enum: CHANNELS, default: "online", index: true },
+
+    /** Derived from the transactions on this order; see recomputePayment(). */
+    paymentStatus: { type: String, enum: PAYMENT_STATUSES, default: "unpaid", index: true },
+    amountPaid: { type: Number, default: 0, min: 0 },
 
     deliveryDate: { type: String, default: "" },
     slot: { type: String, default: "standard" },

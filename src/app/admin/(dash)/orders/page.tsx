@@ -4,13 +4,19 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { money } from "@/lib/format";
-import { ORDER_STATUSES, STATUS_LABEL, type OrderStatus } from "@/lib/orders";
+import {
+  ORDER_STATUSES, STATUS_LABEL, PAYMENT_STATUSES, PAYMENT_LABEL, CHANNEL_LABEL,
+  type OrderStatus, type PaymentStatus, type Channel,
+} from "@/lib/orders";
+import Link2 from "next/link";
 import { useApi, PageHead, Badge, Toolbar, Chip, Loading, ErrorBox, Empty, Pager, type Paged } from "@/components/admin/ui";
 
 type OrderRow = {
   _id: string;
   number: string;
   status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  channel: Channel;
   total: number;
   createdAt: string;
   deliveryDate: string;
@@ -27,8 +33,10 @@ function OrdersInner() {
   const [q, setQ] = useState("");
   const [applied, setApplied] = useState("");
   const [page, setPage] = useState(1);
+  const [channel, setChannel] = useState("all");
+  const [pay, setPay] = useState("all");
 
-  const url = `/api/admin/orders?status=${encodeURIComponent(status)}&page=${page}${
+  const url = `/api/admin/orders?status=${encodeURIComponent(status)}&channel=${channel}&payment=${pay}&page=${page}${
     applied ? `&q=${encodeURIComponent(applied)}` : ""
   }`;
   const { data, error, loading, reload } = useApi<
@@ -43,7 +51,11 @@ function OrdersInner() {
 
   return (
     <>
-      <PageHead title="Orders" sub="Move an order along as it goes through the kitchen and out the door." />
+      <PageHead title="Orders" sub="Move an order along as it goes through the kitchen and out the door.">
+        <Link2 href="/admin/orders/new" className="btn btn-gold px-4 py-2 text-[0.82rem]">
+          + Counter sale
+        </Link2>
+      </PageHead>
 
       <Toolbar>
         <Chip active={status === "all"} onClick={() => filter(() => setStatus("all"))}>
@@ -53,6 +65,20 @@ function OrdersInner() {
           <Chip key={s} active={status === s} onClick={() => filter(() => setStatus(s))}>
             {STATUS_LABEL[s]}
             {data?.counts?.[s] ? ` (${data.counts[s]})` : ""}
+          </Chip>
+        ))}
+
+        <span className="mx-1 h-5 w-px bg-brand-900/12" />
+        {(["all", "online", "in_shop"] as const).map((c) => (
+          <Chip key={c} active={channel === c} onClick={() => filter(() => setChannel(c))}>
+            {c === "all" ? "Any channel" : CHANNEL_LABEL[c as Channel]}
+          </Chip>
+        ))}
+        <span className="mx-1 h-5 w-px bg-brand-900/12" />
+        <Chip active={pay === "all"} onClick={() => filter(() => setPay("all"))}>Any payment</Chip>
+        {PAYMENT_STATUSES.map((s2) => (
+          <Chip key={s2} active={pay === s2} onClick={() => filter(() => setPay(s2))}>
+            {PAYMENT_LABEL[s2]}
           </Chip>
         ))}
 
@@ -111,8 +137,18 @@ function OrdersInner() {
                 {o.deliveryDate || "—"}
                 <span className="block text-[0.7rem] text-brand-700/50">{o.slot}</span>
               </span>
-              <span><Badge value={o.status} label={STATUS_LABEL[o.status]} /></span>
-              <span className="text-[0.78rem] uppercase text-brand-700/70">{o.payment}</span>
+              <span className="flex flex-wrap gap-1.5">
+                <Badge value={o.status} label={STATUS_LABEL[o.status]} />
+                {o.channel === "in_shop" && (
+                  <span className="rounded-full border border-brand-900/12 px-2 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-brand-700">
+                    shop
+                  </span>
+                )}
+              </span>
+              <span className="flex flex-wrap items-center gap-1.5">
+                <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus]} />
+                <span className="text-[0.72rem] uppercase text-brand-700/55">{o.payment}</span>
+              </span>
               <span className="font-semibold text-brand-900 lg:text-right">{money(o.total)}</span>
             </Link>
           ))}
