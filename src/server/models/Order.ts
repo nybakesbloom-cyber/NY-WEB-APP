@@ -2,14 +2,16 @@ import mongoose, { type InferSchemaType, type Model } from "mongoose";
 
 const { Schema, model, models } = mongoose;
 
+// Relative, not the @/ alias: these models are also loaded by
+// scripts/seed.ts under plain Node, which cannot resolve @/.
 export {
   ORDER_STATUSES,
   NEXT_STATUS,
   STATUS_LABEL,
   type OrderStatus,
-} from "@/lib/orders";
+} from "../../lib/orders.ts";
 
-import { ORDER_STATUSES as STATUSES } from "@/lib/orders";
+import { ORDER_STATUSES as STATUSES } from "../../lib/orders.ts";
 
 const LineSchema = new Schema(
   {

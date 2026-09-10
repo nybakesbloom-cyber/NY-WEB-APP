@@ -2,9 +2,11 @@ import mongoose, { type InferSchemaType, type Model } from "mongoose";
 
 const { Schema, model, models } = mongoose;
 
-export { TXN_KINDS, TXN_STATUSES } from "@/lib/orders";
+// Relative, not the @/ alias: these models are also loaded by
+// scripts/seed.ts under plain Node, which cannot resolve @/.
+export { TXN_KINDS, TXN_STATUSES } from "../../lib/orders.ts";
 
-import { TXN_KINDS as KINDS, TXN_STATUSES as STATUSES } from "@/lib/orders";
+import { TXN_KINDS as KINDS, TXN_STATUSES as STATUSES } from "../../lib/orders.ts";
 
 const TransactionSchema = new Schema(
   {
