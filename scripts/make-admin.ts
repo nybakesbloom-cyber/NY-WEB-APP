@@ -63,6 +63,17 @@ ${JSON.stringify(doc, null, 2)}
 db.adminusers.insertOne(${JSON.stringify({ ...doc, createdAt: "NEW_DATE", updatedAt: "NEW_DATE" })
   .replace(/"NEW_DATE"/g, "new Date()")})
 
+── or skip the database entirely and set these ───────────────────────────────
+
+   In a .env file — every $ escaped, or dotenv eats the hash:
+
+ADMIN_LOGIN_EMAIL=${email}
+ADMIN_LOGIN_PASSWORD_HASH=${passwordHash.replace(/\$/g, "\\$")}
+
+   In a hosting dashboard (Vercel, Railway…) — paste it unescaped:
+
+${passwordHash}
+
 ──────────────────────────────────────────────────────────────────────────────
 Sign in at /admin/login with ${email} and the password you just typed.
 The hash is salted, so running this again gives a different string for the

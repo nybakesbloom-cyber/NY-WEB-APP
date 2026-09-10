@@ -22,10 +22,26 @@ export type EnvAdmin = {
   hash?: string;
 };
 
+/** A bcrypt hash is exactly 60 characters: $2a/2b/2y, a cost, then 53 more. */
+const BCRYPT = /^\$2[aby]\$\d{2}\$[./A-Za-z0-9]{53}$/;
+
 export function envAdmin(): EnvAdmin | null {
   const email = process.env.ADMIN_LOGIN_EMAIL?.toLowerCase().trim();
   const password = process.env.ADMIN_LOGIN_PASSWORD;
-  const hash = process.env.ADMIN_LOGIN_PASSWORD_HASH;
+  const raw = process.env.ADMIN_LOGIN_PASSWORD_HASH;
+
+  // A .env file expands $2b, $12 and so on as variable references, which
+  // quietly truncates the hash and turns this into a login that can never
+  // succeed. Say so loudly rather than falling through to the database.
+  let hash = raw;
+  if (raw && !BCRYPT.test(raw)) {
+    console.error(
+      `[admin] ADMIN_LOGIN_PASSWORD_HASH is not a valid bcrypt hash — got ${raw.length} ` +
+        "characters, expected 60. In a .env file every $ must be escaped as \\$; " +
+        "in a hosting dashboard paste it unescaped. Ignoring it.",
+    );
+    hash = undefined;
+  }
 
   // Both halves are required; a username with no secret is not a login.
   if (!email || (!password && !hash)) return null;

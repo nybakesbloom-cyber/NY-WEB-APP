@@ -77,13 +77,21 @@ before anything is seeded, and it keeps working if the database account is lost:
 ```bash
 ADMIN_LOGIN_EMAIL=you@shop.com
 ADMIN_LOGIN_PASSWORD=aPasswordYouChoose        # or, better:
-ADMIN_LOGIN_PASSWORD_HASH=$2b$12$…             # from `npm run make-admin`
+ADMIN_LOGIN_PASSWORD_HASH=\$2b\$12\$…            # from `npm run make-admin`
 ADMIN_LOGIN_NAME=Store owner                   # optional
 ADMIN_LOGIN_ROLE=owner                         # owner | manager | staff
 ```
 
 Prefer the hash on a hosted deployment: a plain password is readable by anyone
 who can open the hosting dashboard, whereas the hash is not.
+
+**In a `.env` file every `$` in the hash must be escaped as `\$`.** dotenv
+expands `$2b`, `$12` and the rest as variable references and silently hands the
+app a 40-character fragment — quoting does not help, only escaping does. In a
+hosting dashboard there is no expansion, so paste it unescaped. `npm run
+make-admin` prints both forms. If the value is not a valid 60-character hash the
+app logs a specific error and ignores it rather than failing the login without
+explanation.
 
 This account is checked **before** the database, so it works even when Mongo is
 unreachable, and database accounts continue to work alongside it. Leave the
