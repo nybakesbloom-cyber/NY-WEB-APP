@@ -62,9 +62,12 @@ export default function ProcessScroll({ steps }: { steps: ProcessStep[] }) {
     };
   }, [reduced, N]);
 
+  // The stages live in an editable content block. If it is empty or missing,
+  // hide the section rather than taking the whole page down with it.
+  if (PROCESS.length === 0) return null;
   if (reduced) return <StackedFallback steps={PROCESS} />;
 
-  const step = PROCESS[phase];
+  const step = PROCESS[Math.min(phase, PROCESS.length - 1)];
 
   return (
     <section
@@ -205,6 +208,7 @@ export default function ProcessScroll({ steps }: { steps: ProcessStep[] }) {
 /** No pinning, no scrubbing — just the five stages, in order. */
 function StackedFallback({ steps }: { steps: ProcessStep[] }) {
   const PROCESS = steps;
+  if (PROCESS.length === 0) return null;
 
   return (
     <section aria-label="How your order is made" className="bg-brand-900 py-16">
