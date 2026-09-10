@@ -13,7 +13,10 @@ export const GET = withAdmin(async ({ req }) => {
   const repeatOnly = q.get("repeat") === "true";
   const page = paging(req, 25);
 
-  const pipeline: PipelineStage[] = [
+  // The base is everyone who has ordered. Filters are layered on top of a copy,
+  // so the summary keeps describing the whole customer base rather than the
+  // slice currently on screen.
+  const base: PipelineStage[] = [
     { $match: { phoneKey: { $nin: ["", null] } } },
     {
       $group: {
@@ -31,6 +34,7 @@ export const GET = withAdmin(async ({ req }) => {
     },
   ];
 
+  const pipeline: PipelineStage[] = [...base];
   if (repeatOnly) pipeline.push({ $match: { orders: { $gte: 2 } } });
   if (search) {
     const rx = new RegExp(search.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
@@ -50,7 +54,7 @@ export const GET = withAdmin(async ({ req }) => {
   ]);
 
   const [summary] = await Order.aggregate([
-    ...pipeline,
+    ...base,
     { $group: { _id: null, people: { $sum: 1 }, repeat: { $sum: { $cond: [{ $gte: ["$orders", 2] }, 1, 0] } } } },
   ]);
 

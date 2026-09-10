@@ -308,6 +308,22 @@ If you later want the speed back, add ISR (`export const revalidate`) plus a
 `revalidatePath` call in the product write routes — do not reintroduce
 `generateStaticParams` over the database.
 
+### Demo data
+
+`npm run seed` gives you the catalogue, the site copy and six journal posts.
+`npm run demo` adds a believable trading history on top, so the dashboard,
+orders, billing and customers can be judged as they would look in use:
+
+```bash
+npm run demo -- --reset              # clear orders and transactions first
+npm run demo -- --days 180 --orders 200
+```
+
+It spreads orders across the period, weights customers so most order once and a
+real repeat tail exists, ages statuses sensibly (old orders are finished, recent
+ones are still moving), leaves cash-on-delivery uncollected until it arrives,
+and produces refunds by cancelling orders that had already been paid.
+
 ### Diagnosing a deployment
 
 `GET /api/health` reports whether the running deployment can reach its database.

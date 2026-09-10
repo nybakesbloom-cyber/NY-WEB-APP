@@ -92,8 +92,8 @@ export default function OrderDetail({ params }: { params: Promise<{ id: string }
 
       <Panel className="mb-4">
         <div className="flex flex-wrap items-center gap-3">
-          <Badge value={o.status} label={STATUS_LABEL[o.status]} />
-          <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus]} />
+          <Badge value={o.status} label={STATUS_LABEL[o.status] ?? o.status} />
+          <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus] ?? "Unpaid"} />
           <span className="rounded-full border border-brand-900/12 px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.1em] text-brand-700">
             {CHANNEL_LABEL[o.channel] ?? "Online"}
           </span>

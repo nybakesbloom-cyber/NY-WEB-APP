@@ -91,7 +91,7 @@ export default function AdminShell({
           </button>
         </div>
 
-        <nav className="flex-1 space-y-1 p-3">
+        <nav className="flex-1 space-y-1 overflow-y-auto p-3">
           {NAV.map((item) => {
             const active = item.exact
               ? pathname === item.href
@@ -117,43 +117,55 @@ export default function AdminShell({
           })}
         </nav>
 
-        <div className={`border-t border-gold-400/15 p-4 ${collapsed ? "lg:hidden" : ""}`}>
-          <p className="truncate text-[0.78rem] font-semibold text-gold-100">{session.name}</p>
-          <p className="truncate text-[0.7rem] text-gold-100/50">{session.email}</p>
-          <span className="mt-1.5 inline-block rounded-full bg-brand-800 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-gold-300">
-            {session.role}
-          </span>
-          <div className="mt-3 flex gap-2">
-            <Link
-              href="/"
-              className="flex-1 rounded-lg border border-gold-400/30 px-2 py-1.5 text-center text-[0.72rem] font-semibold text-gold-200 hover:bg-brand-800"
-            >
-              View shop
-            </Link>
-            <button
-              onClick={signOut}
-              className="flex-1 rounded-lg border border-gold-400/30 px-2 py-1.5 text-[0.72rem] font-semibold text-gold-200 hover:bg-brand-800"
-            >
-              Sign out
-            </button>
+        <div className="border-t border-gold-400/15 p-3">
+          {collapsed ? (
+            <div className="hidden flex-col gap-2 lg:flex">
+              <Link
+                href="/"
+                title="View shop"
+                aria-label="View shop"
+                className="grid h-9 place-items-center rounded-lg border border-gold-400/30 text-gold-200 hover:bg-brand-800"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M4 9h16M6 9V6.5A1.5 1.5 0 0 1 7.5 5h9A1.5 1.5 0 0 1 18 6.5V9M5 9l1 9.5A1.5 1.5 0 0 0 7.5 20h9a1.5 1.5 0 0 0 1.5-1.5L19 9" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </Link>
+              <button
+                onClick={signOut}
+                title="Sign out"
+                aria-label="Sign out"
+                className="grid h-9 place-items-center rounded-lg border border-gold-400/30 text-gold-200 hover:bg-brand-800"
+              >
+                <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
+                  <path d="M15 17l5-5-5-5M20 12H9M12 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            </div>
+          ) : null}
+
+          <div className={collapsed ? "lg:hidden" : ""}>
+            <p className="truncate px-1 text-[0.78rem] font-semibold text-gold-100">{session.name}</p>
+            <p className="truncate px-1 text-[0.7rem] text-gold-100/50">{session.email}</p>
+            <span className="mx-1 mt-1.5 inline-block rounded-full bg-brand-800 px-2 py-0.5 text-[0.62rem] font-bold uppercase tracking-wider text-gold-300">
+              {session.role}
+            </span>
+            <div className="mt-3 flex gap-2">
+              <Link
+                href="/"
+                className="flex-1 rounded-lg border border-gold-400/30 px-2 py-1.5 text-center text-[0.72rem] font-semibold text-gold-200 hover:bg-brand-800"
+              >
+                View shop
+              </Link>
+              <button
+                onClick={signOut}
+                className="flex-1 rounded-lg border border-gold-400/30 px-2 py-1.5 text-[0.72rem] font-semibold text-gold-200 hover:bg-brand-800"
+              >
+                Sign out
+              </button>
+            </div>
           </div>
         </div>
       </aside>
-
-      {collapsed && (
-        <div className="hidden border-t border-gold-400/15 p-3 lg:block" style={{ gridColumn: 1 }}>
-          <button
-            onClick={signOut}
-            title="Sign out"
-            aria-label="Sign out"
-            className="grid h-9 w-full place-items-center rounded-lg border border-gold-400/30 text-gold-200 hover:bg-brand-800"
-          >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.8">
-              <path d="M15 17l5-5-5-5M20 12H9M12 20H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </button>
-        </div>
-      )}
 
       <div className="min-w-0">
         <div className="flex items-center gap-3 border-b border-brand-900/10 bg-white px-4 py-3 lg:hidden">

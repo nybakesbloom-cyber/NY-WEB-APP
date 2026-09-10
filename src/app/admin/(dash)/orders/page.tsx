@@ -138,7 +138,7 @@ function OrdersInner() {
                 <span className="block text-[0.7rem] text-brand-700/50">{o.slot}</span>
               </span>
               <span className="flex flex-wrap gap-1.5">
-                <Badge value={o.status} label={STATUS_LABEL[o.status]} />
+                <Badge value={o.status} label={STATUS_LABEL[o.status] ?? o.status} />
                 {o.channel === "in_shop" && (
                   <span className="rounded-full border border-brand-900/12 px-2 py-1 text-[0.62rem] font-bold uppercase tracking-wider text-brand-700">
                     shop
@@ -146,7 +146,7 @@ function OrdersInner() {
                 )}
               </span>
               <span className="flex flex-wrap items-center gap-1.5">
-                <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus]} />
+                <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus] ?? "Unpaid"} />
                 <span className="text-[0.72rem] uppercase text-brand-700/55">{o.payment}</span>
               </span>
               <span className="font-semibold text-brand-900 lg:text-right">{money(o.total)}</span>

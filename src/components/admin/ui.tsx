@@ -159,14 +159,17 @@ const STATUS_TONE: Record<string, string> = {
   refund: "bg-rose-100 text-rose-800",
 };
 
-export function Badge({ value, label }: { value: string; label?: string }) {
+export function Badge({ value, label }: { value?: string | null; label?: string }) {
+  // Documents written before a field existed will not have it. A missing value
+  // is a dash, never a crash that takes the whole page's interactivity with it.
+  const v = value ?? "";
   return (
     <span
       className={`inline-block whitespace-nowrap rounded-full px-2.5 py-1 text-[0.66rem] font-bold uppercase tracking-[0.1em] ${
-        STATUS_TONE[value] ?? "bg-slate-100 text-slate-700"
+        STATUS_TONE[v] ?? "bg-slate-100 text-slate-700"
       }`}
     >
-      {label ?? value.replace(/_/g, " ")}
+      {label ?? (v ? v.replace(/_/g, " ") : "—")}
     </span>
   );
 }

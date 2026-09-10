@@ -10,7 +10,8 @@
     "seed": "node --no-warnings --experimental-strip-types scripts/seed.ts",
     "make-admin": "node --no-warnings --experimental-strip-types scripts/make-admin.ts",
     "set-admin-password": "node --no-warnings --experimental-strip-types scripts/set-admin-password.ts",
-    "backfill": "node --no-warnings --experimental-strip-types scripts/backfill-phone-keys.ts"
+    "backfill": "node --no-warnings --experimental-strip-types scripts/backfill-phone-keys.ts",
+    "demo": "node --no-warnings --experimental-strip-types scripts/demo-data.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

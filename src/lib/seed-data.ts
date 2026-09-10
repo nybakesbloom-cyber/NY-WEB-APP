@@ -775,6 +775,63 @@ export const CONTENT: { key: string; label: string; data: unknown }[] = [
 
 export const POSTS = [
   {
+    slug: "how-to-keep-cut-flowers-alive",
+    title: "How to keep cut flowers alive for a fortnight",
+    excerpt: "Four things that matter, and three that people worry about and shouldn't.",
+    author: "The buying desk",
+    tags: ["Flowers", "Care"],
+    art: { kind: "bouquet", hues: ["#C9A227", "#F6E3A1"] },
+    published: true,
+    body: `Most bouquets die of thirst rather than age. A stem that has been out of water for an hour seals its own cut and stops drinking, and no amount of flower food will reopen it.
+
+## The four that matter
+
+Recut two centimetres off every stem at an angle, under running water if you can. Strip any leaf that would sit below the waterline — submerged foliage rots and the bacteria block the stem. Change the water every second day rather than topping it up. And keep the vase away from the fruit bowl: ripening fruit gives off ethylene, which ages flowers quickly.
+
+## The three that don't
+
+Aspirin, sugar and a copper coin do very little. The sachet that comes with the bouquet is mostly a mild biocide, which is genuinely useful, but plain water changed often does nearly the same job.
+
+Tulips are the exception to everything. They keep growing in the vase, they bend towards light, and they will rearrange themselves overnight no matter what you do.`,
+  },
+  {
+    slug: "eggless-is-not-a-substitution",
+    title: "Eggless is not a substitution",
+    excerpt: "It is a different sponge, mixed on its own bench, not the usual recipe with something left out.",
+    author: "The kitchen",
+    tags: ["Cakes", "Behind the scenes"],
+    art: { kind: "cake", hues: ["#D9A404", "#FBEFC2"] },
+    published: true,
+    body: `Ask for an eggless cake in most places and you get the normal batter with the eggs replaced by something that behaves a bit like them. It works, roughly, and it tastes like a compromise.
+
+## Why it needs its own recipe
+
+Eggs do three jobs at once — they bind, they lift, and they carry fat and water together. Take them out and you have to solve all three separately: condensed milk or yoghurt for the bind, an acid and soda for the lift, and more fat to keep the crumb from drying.
+
+## And its own bench
+
+Our eggless work happens on a separate bench with separate tools. That is not fussiness about flavour, it is the only way to say there has been no contact — which is the thing people are actually asking about when they ask.`,
+  },
+  {
+    slug: "what-a-photo-at-the-door-is-for",
+    title: "What the photo at the door is actually for",
+    excerpt: "A status that says delivered is not evidence that anything arrived.",
+    author: "Dispatch",
+    tags: ["Delivery"],
+    art: { kind: "plant", hues: ["#1C8560", "#C9A227"] },
+    published: true,
+    body: `Every delivery service has a status that says delivered. Very few of them can tell you what was handed over, to whom, or in what condition.
+
+## The dispute it prevents
+
+Most complaints are not about lateness. They are about a cake that arrived leaning, or flowers that were left with a neighbour, or a handover nobody can now describe. A photograph taken at the door settles all three in about ten seconds.
+
+## What we do with it
+
+It goes to the sender, not just into a file. If something looks wrong in the picture we would rather hear about it that evening than a day later, when the only options left are apologies.`,
+  },
+
+  {
     slug: "why-we-cool-the-sponge-for-two-hours",
     title: "Why we let the sponge sit for two hours",
     excerpt: "The least interesting step in the kitchen, and the one that decides whether your slice holds together.",

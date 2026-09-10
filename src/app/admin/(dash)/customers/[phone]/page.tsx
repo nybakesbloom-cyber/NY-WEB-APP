@@ -63,8 +63,8 @@ export default function CustomerPage({ params }: { params: Promise<{ phone: stri
                 <span className="min-w-0 truncate text-brand-700/80">
                   {o.lines.map((l) => `${l.name} ×${l.qty}`).join(", ")}
                 </span>
-                <Badge value={o.status} label={STATUS_LABEL[o.status]} />
-                <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus]} />
+                <Badge value={o.status} label={STATUS_LABEL[o.status] ?? o.status} />
+                <Badge value={o.paymentStatus} label={PAYMENT_LABEL[o.paymentStatus] ?? "Unpaid"} />
                 <span className="font-semibold text-brand-900 sm:text-right">{money(o.total)}</span>
               </Link>
             ))}
