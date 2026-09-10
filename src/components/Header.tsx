@@ -181,7 +181,7 @@ export default function Header() {
 
       {/* desktop nav */}
       <div ref={navRef} className="hidden border-b border-brand-800/10 bg-brand-800 lg:block">
-        <div className="wrap flex items-center gap-1 text-[0.82rem] font-semibold tracking-wide text-gold-100">
+        <div className="wrap flex items-center gap-0.5 overflow-x-auto text-[0.8rem] font-semibold tracking-wide text-gold-100 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <Dropdown
             label="Shop by Category"
             open={menu === "cat"}
@@ -222,7 +222,7 @@ export default function Header() {
           <NavLink href="/how-it-works">How it&apos;s made</NavLink>
           <NavLink href="/blog">Journal</NavLink>
 
-          <span className="ml-auto hidden shrink-0 items-center gap-1.5 whitespace-nowrap py-3 text-[0.78rem] font-medium text-gold-100/80 xl:flex">
+          <span className="ml-auto hidden shrink-0 items-center gap-1.5 whitespace-nowrap py-3 pl-4 text-[0.78rem] font-medium text-gold-100/80 2xl:flex">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold-400" fill="none" stroke="currentColor" strokeWidth="1.8">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 2" strokeLinecap="round" />
@@ -292,7 +292,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   return (
     <Link
       href={href}
-      className="rounded-md px-3 py-3 transition hover:bg-brand-700 hover:text-white"
+      className="whitespace-nowrap rounded-md px-3 py-3 transition hover:bg-brand-700 hover:text-white"
     >
       {children}
     </Link>
@@ -326,7 +326,7 @@ function Dropdown({
       <button
         onClick={onToggle}
         aria-expanded={open}
-        className={`flex items-center gap-1.5 px-3 py-3 transition hover:bg-brand-700 hover:text-white ${
+        className={`flex items-center gap-1.5 whitespace-nowrap px-3 py-3 transition hover:bg-brand-700 hover:text-white ${
           open ? "bg-brand-700 text-white" : ""
         }`}
       >
