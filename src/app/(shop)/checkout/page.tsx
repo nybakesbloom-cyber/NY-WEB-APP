@@ -85,7 +85,7 @@ export default function CheckoutPage() {
       try {
         window.sessionStorage.setItem(
           "ny-bakes-and-bloom-last-order",
-          JSON.stringify({ orderId: data.number, total: data.total, count, date, slot }),
+          JSON.stringify({ orderId: data.number, total: data.total, count, date, slot, demo: !!data.demo }),
         );
       } catch {
         /* storage unavailable — the confirmation page falls back to defaults */
@@ -119,8 +119,8 @@ export default function CheckoutPage() {
       </h1>
       <div className="gold-rule mt-3 w-24" />
       <p className="mt-3 max-w-xl text-sm leading-relaxed text-brand-700/70">
-        No card is charged — but the order is real: it lands in the kitchen queue and appears in
-        the admin the moment you place it.
+        No card is charged. While the shop is in demo mode the order is confirmed but not saved —
+        every field below is still what we would genuinely ask for.
       </p>
 
       <form onSubmit={placeOrder} className="mt-8 grid gap-8 lg:grid-cols-[1fr_380px]">

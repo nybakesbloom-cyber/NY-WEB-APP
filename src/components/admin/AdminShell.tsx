@@ -12,6 +12,7 @@ const NAV = [
   { href: "/admin/customers", label: "Customers", icon: "people" },
   { href: "/admin/billing", label: "Billing", icon: "rupee" },
   { href: "/admin/products", label: "Products", icon: "tag" },
+  { href: "/admin/posts", label: "Journal", icon: "pen" },
   { href: "/admin/content", label: "Site content", icon: "text" },
   { href: "/admin/media", label: "Images", icon: "image" },
   { href: "/admin/import", label: "Import & export", icon: "upload" },
@@ -28,6 +29,7 @@ function Icon({ name }: { name: string }) {
       {name === "text" && <><path d="M4 6h16M4 11h16M4 16h10" /></>}
       {name === "image" && <><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" /><circle cx="8.6" cy="9.6" r="1.8" /><path d="m4 16 4.6-4.2L20 19" /></>}
       {name === "upload" && <><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15" /><path d="M12 4v11M8 8l4-4 4 4" /></>}
+      {name === "pen" && <><path d="M4 20h4l10-10a2.8 2.8 0 0 0-4-4L4 16v4Z" /><path d="M13.5 6.5l4 4" /></>}
       {name === "people" && <><circle cx="9" cy="8" r="3.2" /><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5" /><path d="M16 5.2a3.2 3.2 0 0 1 0 5.6M17.5 14.8c2.1.7 3.5 2.6 3.5 5.2" /></>}
     </svg>
   );

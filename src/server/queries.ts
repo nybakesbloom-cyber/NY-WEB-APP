@@ -3,6 +3,7 @@ import { connectDB } from "./db";
 import { Product as ProductModel } from "./models/Product";
 import { Content } from "./models/Content";
 import { Media } from "./models/Media";
+import { Post } from "./models/Post";
 import {
   DEFAULT_SETTINGS,
   type Category,
@@ -119,6 +120,56 @@ export async function getHeader() {
 
 export async function getSettings(): Promise<Settings> {
   return { ...DEFAULT_SETTINGS, ...(await getContent<Partial<Settings>>("settings", {})) };
+}
+
+export type BlogPost = {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt: string;
+  body: string;
+  author: string;
+  tags: string[];
+  imageUrl: string | null;
+  art: Product["art"];
+  hues: [string, string];
+  publishedAt: string | null;
+  readMinutes: number;
+};
+
+function toPost(doc: Record<string, unknown>): BlogPost {
+  const art = (doc.art ?? {}) as { kind?: string; hues?: string[] };
+  const hues = (art.hues ?? ["#A6122B", "#E8607A"]) as string[];
+  return {
+    id: String(doc._id),
+    slug: String(doc.slug),
+    title: String(doc.title),
+    excerpt: String(doc.excerpt ?? ""),
+    body: String(doc.body ?? ""),
+    author: String(doc.author ?? ""),
+    tags: (doc.tags ?? []) as string[],
+    imageUrl: doc.cover ? `/api/media/${String(doc.cover)}` : null,
+    art: (art.kind ?? "bouquet") as Product["art"],
+    hues: [hues[0] ?? "#A6122B", hues[1] ?? "#E8607A"],
+    publishedAt: doc.publishedAt ? new Date(doc.publishedAt as Date).toISOString() : null,
+    readMinutes: Number(doc.readMinutes ?? 1),
+  };
+}
+
+/** Published posts, newest first. Drafts never leave the admin. */
+export async function getPosts(limit = 50): Promise<BlogPost[]> {
+  await connectDB();
+  const docs = await Post.find({ published: true })
+    .sort({ publishedAt: -1 })
+    .limit(limit)
+    .lean();
+  return docs.map((d) => toPost(d as Record<string, unknown>));
+}
+
+export async function getPost(slug: string): Promise<BlogPost | null> {
+  await connectDB();
+  const doc = await Post.findOne({ slug, published: true }).lean();
+  return doc ? toPost(doc as Record<string, unknown>) : null;
 }
 
 /** Everything the client bundle needs, fetched once in the root layout. */

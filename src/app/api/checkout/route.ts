@@ -37,6 +37,9 @@ export async function POST(req: Request) {
     const baseFee = Number(settings.deliveryFee ?? 99);
     const codFeeRate = Number(settings.codFee ?? 40);
     const prefix = String(settings.orderPrefix ?? "NY");
+    // Default to demo: a site that is still being set up should not be
+    // collecting real orders because someone found the URL.
+    const demoMode = settings.demoMode !== false;
 
     // Prices come from the database, never from the browser.
     const slugs = lines.map((l) => l.slug);
@@ -75,6 +78,21 @@ export async function POST(req: Request) {
     }
 
     const total = subtotal + deliveryFee + slotFee + codFee;
+
+    if (demoMode) {
+      // Everything above still runs — prices, availability and the
+      // cash-on-delivery rule are all checked — but nothing is written.
+      return json(
+        {
+          ok: true,
+          demo: true,
+          number: `${prefix}-DEMO-${Math.floor(1000 + Math.random() * 9000)}`,
+          total,
+        },
+        200,
+      );
+    }
+
     const number = await nextOrderNumber(prefix);
 
     const order = await Order.create({

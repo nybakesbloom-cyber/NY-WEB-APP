@@ -13,6 +13,7 @@ type LastOrder = {
   count: number;
   date: string;
   slot: string;
+  demo?: boolean;
 };
 
 const noopSubscribe = () => () => {};
@@ -112,7 +113,9 @@ function Confirmation() {
         </div>
 
         <p className="mt-8 text-[0.74rem] text-brand-700/50">
-          Demo storefront — no payment was taken and no order was placed.
+          {order?.demo === false
+            ? "No payment was taken — this is a demonstration storefront."
+            : "Demo mode — no payment was taken and no order was saved."}
         </p>
       </div>
     </div>

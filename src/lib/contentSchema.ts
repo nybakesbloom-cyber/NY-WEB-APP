@@ -196,6 +196,16 @@ export const CONTENT_SCHEMA: Record<string, BlockSchema> = {
     ],
   },
 
+  blog: {
+    label: "Journal",
+    where: "The heading on /blog",
+    fields: [
+      { type: "text", key: "eyebrow", label: "Small label above" },
+      { type: "text", key: "title", label: "Heading" },
+      { type: "textarea", key: "sub", label: "Description", rows: 2 },
+    ],
+  },
+
   footer: {
     label: "Footer",
     where: "Everything below the last section",
@@ -225,6 +235,10 @@ export const CONTENT_SCHEMA: Record<string, BlockSchema> = {
     label: "Store settings",
     where: "Delivery thresholds, fees and order numbering",
     fields: [
+      {
+        type: "boolean", key: "demoMode", label: "Demo mode — do not save real orders",
+        hint: "On: checkout shows a confirmation but writes nothing. Turn off when you are ready to take real orders.",
+      },
       { type: "number", key: "freeDeliveryOver", label: "Free delivery over (₹)", min: 0 },
       { type: "number", key: "deliveryFee", label: "Delivery fee (₹)", min: 0 },
       { type: "number", key: "codFee", label: "Cash-on-delivery fee (₹)", min: 0 },
@@ -239,5 +253,5 @@ export const CONTENT_SCHEMA: Record<string, BlockSchema> = {
 /** Order the admin lists blocks in — roughly top of the page to bottom. */
 export const BLOCK_ORDER = [
   "theme", "announcements", "header", "hero", "sections", "categories",
-  "promises", "process", "occasions", "reviews", "cta", "footer", "settings",
+  "promises", "process", "occasions", "reviews", "cta", "blog", "footer", "settings",
 ];

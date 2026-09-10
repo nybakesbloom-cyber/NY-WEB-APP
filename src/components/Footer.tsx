@@ -87,6 +87,11 @@ export default async function Footer() {
                 How it is made
               </Link>
             </li>
+            <li>
+              <Link href="/blog" className="transition hover:text-gold-300">
+                Journal
+              </Link>
+            </li>
             {content.help.map((t) => (
               <li key={t}>
                 <span className="cursor-default transition hover:text-gold-300">{t}</span>

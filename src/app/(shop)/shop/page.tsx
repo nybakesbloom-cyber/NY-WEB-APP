@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import ProductCard from "@/components/ProductCard";
 import SortSelect from "@/components/SortSelect";
 import Reveal from "@/components/Reveal";
-import { filterProducts } from "@/lib/catalog";
+import { filterProducts, PAGE_SIZE } from "@/lib/catalog";
 import { getProducts, getCategories, getOccasions } from "@/server/queries";
 
 const PRICE_BANDS = [
@@ -31,6 +31,8 @@ function buildHref(sp: SP, patch: Record<string, string | undefined>) {
     if (v === undefined) out.delete(k);
     else out.set(k, v);
   }
+  // Changing a filter returns you to the first page.
+  if (!("page" in patch)) out.delete("page");
   const qs = out.toString();
   return qs ? `/shop?${qs}` : "/shop";
 }
@@ -46,15 +48,21 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const occasion = one(sp, "occasion");
   const maxPrice = one(sp, "max");
   const sort = one(sp, "sort") ?? "popular";
+  const pageNo = Math.max(1, Number(one(sp, "page")) || 1);
   const query = one(sp, "q");
 
-  const products = filterProducts(all, {
+  const matching = filterProducts(all, {
     category,
     occasion,
     maxPrice: maxPrice ? Number(maxPrice) : undefined,
     sort,
     query,
   });
+
+  // Paged on the server: a growing catalogue must not become a growing payload.
+  const pages = Math.max(1, Math.ceil(matching.length / PAGE_SIZE));
+  const current = Math.min(pageNo, pages);
+  const products = matching.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
 
   const cat = CATEGORIES.find((c) => c.slug === category);
   const occ = OCCASIONS.find((o) => o.slug === occasion);
@@ -66,7 +74,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       : (cat?.name ?? occ?.name ?? "Everything we make");
 
   const blurb = query
-    ? `${products.length} ${products.length === 1 ? "match" : "matches"} in the catalogue.`
+    ? `${matching.length} ${matching.length === 1 ? "match" : "matches"} in the catalogue.`
     : (cat?.blurb ?? occ?.blurb ?? "Twenty-four things, each made or arranged the day it goes out.");
 
   const activeFilters = [category, occasion, maxPrice, query].filter(Boolean).length;
@@ -151,8 +159,16 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <div>
           <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm text-brand-700/75">
-              <strong className="text-brand-900">{products.length}</strong>{" "}
-              {products.length === 1 ? "product" : "products"}
+              {matching.length === 0 ? (
+                "Nothing here"
+              ) : (
+                <>
+                  <strong className="text-brand-900">
+                    {(current - 1) * PAGE_SIZE + 1}–{Math.min(current * PAGE_SIZE, matching.length)}
+                  </strong>{" "}
+                  of {matching.length} {matching.length === 1 ? "product" : "products"}
+                </>
+              )}
             </p>
             <SortSelect value={sort} />
           </div>
@@ -178,9 +194,67 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
               ))}
             </div>
           )}
+
+          {pages > 1 && (
+            <nav className="mt-9 flex flex-wrap items-center justify-center gap-1.5" aria-label="Pagination">
+              <PageLink sp={sp} to={current - 1} disabled={current <= 1}>
+                ← Prev
+              </PageLink>
+              {Array.from({ length: pages }, (_, i) => i + 1)
+                .filter((n) => n === 1 || n === pages || Math.abs(n - current) <= 1)
+                .map((n, i, all) => (
+                  <span key={n} className="flex items-center gap-1.5">
+                    {i > 0 && all[i - 1] !== n - 1 && (
+                      <span className="px-1 text-brand-700/40">…</span>
+                    )}
+                    <PageLink sp={sp} to={n} current={n === current}>
+                      {n}
+                    </PageLink>
+                  </span>
+                ))}
+              <PageLink sp={sp} to={current + 1} disabled={current >= pages}>
+                Next →
+              </PageLink>
+            </nav>
+          )}
         </div>
       </div>
     </>
+  );
+}
+
+function PageLink({
+  sp,
+  to,
+  current,
+  disabled,
+  children,
+}: {
+  sp: SP;
+  to: number;
+  current?: boolean;
+  disabled?: boolean;
+  children: React.ReactNode;
+}) {
+  if (disabled) {
+    return (
+      <span className="rounded-lg border border-brand-800/8 px-3.5 py-2 text-sm text-brand-700/30">
+        {children}
+      </span>
+    );
+  }
+  return (
+    <Link
+      href={buildHref(sp, { page: to === 1 ? undefined : String(to) })}
+      aria-current={current ? "page" : undefined}
+      className={`rounded-lg px-3.5 py-2 text-sm font-semibold transition ${
+        current
+          ? "bg-brand-800 text-gold-100"
+          : "border border-brand-800/12 bg-white text-brand-800 hover:border-gold-500"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }
 

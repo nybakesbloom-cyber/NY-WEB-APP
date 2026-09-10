@@ -49,6 +49,8 @@ export type Product = {
 };
 
 export type Settings = {
+  /** When on, checkout confirms without writing an order to the database. */
+  demoMode: boolean;
   freeDeliveryOver: number;
   deliveryFee: number;
   codFee: number;
@@ -57,6 +59,7 @@ export type Settings = {
 };
 
 export const DEFAULT_SETTINGS: Settings = {
+  demoMode: true,
   freeDeliveryOver: 1499,
   deliveryFee: 99,
   codFee: 40,
@@ -76,6 +79,8 @@ export function productPrice(product: Product, variantLabel?: string) {
     product.variants.find((v) => v.label === variantLabel) ?? product.variants[0];
   return product.price + (variant?.delta ?? 0);
 }
+
+export const PAGE_SIZE = 12;
 
 export function filterProducts(
   products: Product[],

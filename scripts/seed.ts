@@ -9,12 +9,13 @@
  */
 import { readFileSync } from "node:fs";
 import mongoose from "mongoose";
-import { PRODUCTS, CONTENT } from "../src/lib/seed-data.ts";
+import { PRODUCTS, CONTENT, POSTS } from "../src/lib/seed-data.ts";
 import { Product } from "../src/server/models/Product.ts";
 import { Content } from "../src/server/models/Content.ts";
 import { AdminUser } from "../src/server/models/AdminUser.ts";
 import { Order } from "../src/server/models/Order.ts";
 import { Transaction } from "../src/server/models/Transaction.ts";
+import { Post } from "../src/server/models/Post.ts";
 import bcrypt from "bcryptjs";
 
 // .env.local is read by Next at runtime, but a plain node script needs it too.
@@ -83,6 +84,24 @@ async function main() {
     cWritten++;
   }
   console.log(`content: ${cWritten} written, ${cSkipped} left alone`);
+
+  // ---- blog posts --------------------------------------------------------
+  let posts = 0;
+  let postsSkipped = 0;
+  for (const post of POSTS) {
+    if ((await Post.findOne({ slug: post.slug })) && !force) {
+      postsSkipped++;
+      continue;
+    }
+    const words = post.body.trim().split(/\s+/).length;
+    await Post.findOneAndUpdate(
+      { slug: post.slug },
+      { ...post, readMinutes: Math.max(1, Math.round(words / 200)), publishedAt: new Date() },
+      { upsert: true },
+    );
+    posts++;
+  }
+  console.log(`posts: ${posts} written, ${postsSkipped} left alone`);
 
   // ---- first admin -------------------------------------------------------
   const email = (process.env.ADMIN_SEED_EMAIL ?? "").toLowerCase().trim();

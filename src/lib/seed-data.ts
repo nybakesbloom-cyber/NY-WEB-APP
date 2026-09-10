@@ -738,6 +738,15 @@ export const CONTENT: { key: string; label: string; data: unknown }[] = [
     },
   },
   {
+    key: "blog",
+    label: "Journal",
+    data: {
+      eyebrow: "From the kitchen",
+      title: "Journal",
+      sub: "Notes from the kitchen and the flower market — what we bake, what we buy, and why.",
+    },
+  },
+  {
     key: "footer",
     label: "Footer",
     data: {
@@ -752,6 +761,7 @@ export const CONTENT: { key: string; label: string; data: unknown }[] = [
     key: "settings",
     label: "Store settings",
     data: {
+      demoMode: true,
       freeDeliveryOver: 1499,
       deliveryFee: 99,
       codFee: 40,
@@ -760,5 +770,64 @@ export const CONTENT: { key: string; label: string; data: unknown }[] = [
       currency: "INR",
       orderPrefix: "NY",
     },
+  },
+];
+
+export const POSTS = [
+  {
+    slug: "why-we-cool-the-sponge-for-two-hours",
+    title: "Why we let the sponge sit for two hours",
+    excerpt: "The least interesting step in the kitchen, and the one that decides whether your slice holds together.",
+    author: "The kitchen",
+    tags: ["Behind the scenes", "Cakes"],
+    art: { kind: "cake", hues: ["#3E2417", "#7B4A2C"] },
+    published: true,
+    body: `Baking a sponge takes twenty-five minutes. Making it worth eating takes another two hours, and almost all of that is waiting.
+
+## What happens if you skip it
+
+Layer a warm sponge and the cream meets a surface that is still giving off steam. It thins, soaks in, and by the time the box reaches a table the middle has sunk. The cake looks fine when it leaves us and wrong when it is cut, which is the worst possible order.
+
+## Why nobody talks about it
+
+Because it is not a technique. There is nothing to photograph and nothing to claim. It is a gap in the schedule that costs money — an oven standing idle, a bench occupied, an order that cannot be finished early even when the shop is quiet.
+
+That is also why it is the first thing to go when a kitchen is busy. We built the timeline around the wait instead, which is why our cut-off is 6 PM and not 9.`,
+  },
+  {
+    slug: "what-five-in-the-morning-looks-like",
+    title: "What five in the morning looks like at the flower market",
+    excerpt: "Roses are graded by head size on the floor, and the ones with soft necks go back in the crate.",
+    author: "The buying desk",
+    tags: ["Flowers", "Behind the scenes"],
+    art: { kind: "bouquet", hues: ["#A6122B", "#E8607A"] },
+    published: true,
+    body: `The market opens before the heat does. By six the good stems are gone, and by eight what is left has been standing in a warming room for two hours.
+
+## Grading is the whole job
+
+A bunch of fifty roses should look like one bunch, not two grades stapled together. That means sorting by head size on the floor, in the dark, before anything is wrapped — and putting back anything with a soft neck, however good the price.
+
+## Buying tight on purpose
+
+Lilies and tulips are bought in bud. They open in the recipient's room over the following two days rather than in our van. It looks less impressive at the point of handover and it is worth roughly a week of vase life, which is the trade we would make every time.`,
+  },
+  {
+    slug: "the-midnight-route",
+    title: "The midnight route",
+    excerpt: "Birthday orders ride a separate late run with fewer stops. Median drop time last month was 11:52 PM.",
+    author: "Dispatch",
+    tags: ["Delivery"],
+    art: { kind: "combo", hues: ["#A6122B", "#C9A227"] },
+    published: true,
+    body: `A midnight delivery is not a normal delivery done late. It is a different route, with a different loading order and far fewer stops.
+
+## Why it is separate
+
+A rider finishing a full evening round at half past eleven is not going to make a 11:55 drop. So the late run is loaded last, leaves at ten, and carries only orders booked for that window.
+
+## The doorbell question
+
+Plenty of people ask us not to ring. We message instead, wait, and hand over at the door. It is a small thing that turns a surprise into a surprise rather than a household waking up.`,
   },
 ];

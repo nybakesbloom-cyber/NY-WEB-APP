@@ -27,6 +27,18 @@ export default function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<"cat" | "occ" | null>(null);
+  const closeTimer = useRef<number | undefined>(undefined);
+
+  // A short delay so the panel does not vanish while the pointer crosses the
+  // gap between the button and the menu.
+  const openMenu = (which: "cat" | "occ") => {
+    window.clearTimeout(closeTimer.current);
+    setMenu(which);
+  };
+  const closeMenu = () => {
+    window.clearTimeout(closeTimer.current);
+    closeTimer.current = window.setTimeout(() => setMenu(null), 140);
+  };
   const [city, setCity] = useState("");
   const [q, setQ] = useState("");
   const router = useRouter();
@@ -41,6 +53,8 @@ export default function Header() {
     setOpen(false);
     setMenu(null);
   }
+
+  useEffect(() => () => window.clearTimeout(closeTimer.current), []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -172,6 +186,8 @@ export default function Header() {
             label="Shop by Category"
             open={menu === "cat"}
             onToggle={() => setMenu(menu === "cat" ? null : "cat")}
+            onOpen={() => openMenu("cat")}
+            onClose={closeMenu}
           >
             {categories.map((c) => (
               <Link key={c.slug} href={`/shop?category=${c.slug}`} className="group block rounded-lg px-3 py-2.5 hover:bg-brand-50">
@@ -185,6 +201,8 @@ export default function Header() {
             label="Shop by Occasion"
             open={menu === "occ"}
             onToggle={() => setMenu(menu === "occ" ? null : "occ")}
+            onOpen={() => openMenu("occ")}
+            onClose={closeMenu}
             wide
           >
             {occasions.map((o) => (
@@ -202,6 +220,7 @@ export default function Header() {
           <NavLink href="/shop?category=hampers">Hampers</NavLink>
           <NavLink href="/shop?sort=price-asc">Under ₹999</NavLink>
           <NavLink href="/how-it-works">How it&apos;s made</NavLink>
+          <NavLink href="/blog">Journal</NavLink>
 
           <span className="ml-auto hidden shrink-0 items-center gap-1.5 whitespace-nowrap py-3 text-[0.78rem] font-medium text-gold-100/80 xl:flex">
             <svg viewBox="0 0 24 24" className="h-4 w-4 text-gold-400" fill="none" stroke="currentColor" strokeWidth="1.8">
@@ -240,9 +259,15 @@ export default function Header() {
             </div>
             <Link
               href="/how-it-works"
-              className="mb-4 block rounded-lg bg-brand-800 px-3 py-2.5 text-sm font-semibold text-gold-100"
+              className="mb-2 block rounded-lg bg-brand-800 px-3 py-2.5 text-sm font-semibold text-gold-100"
             >
               How it&apos;s made — all five stages
+            </Link>
+            <Link
+              href="/blog"
+              className="mb-4 block rounded-lg border border-brand-800/12 px-3 py-2.5 text-sm font-semibold text-brand-800"
+            >
+              Journal
             </Link>
             <p className="eyebrow mb-2">Occasions</p>
             <div className="grid grid-cols-2 gap-1.5">
@@ -278,17 +303,26 @@ function Dropdown({
   label,
   open,
   onToggle,
+  onOpen,
+  onClose,
   children,
   wide,
 }: {
   label: string;
   open: boolean;
   onToggle: () => void;
+  onOpen: () => void;
+  onClose: () => void;
   children: React.ReactNode;
   wide?: boolean;
 }) {
   return (
-    <div className="relative">
+    <div
+      className="relative"
+      onMouseEnter={onOpen}
+      onMouseLeave={onClose}
+      onFocusCapture={onOpen}
+    >
       <button
         onClick={onToggle}
         aria-expanded={open}
