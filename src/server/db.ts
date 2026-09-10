@@ -20,7 +20,10 @@ export async function connectDB() {
 
   if (!URI) {
     throw new Error(
-      "MONGODB_URI is not set. Copy .env.example to .env.local and fill it in.",
+      "MONGODB_URI is not set. Locally: copy .env.example to .env.local. " +
+        "On Vercel: add MONGODB_URI and ADMIN_SESSION_SECRET under Project " +
+        "Settings → Environment Variables, pointing at a reachable database " +
+        "(Atlas, not 127.0.0.1).",
     );
   }
 

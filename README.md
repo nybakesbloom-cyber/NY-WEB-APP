@@ -213,6 +213,31 @@ message, so the same cake with two different messages is two lines.
 `brand-*` (emerald) and `gold-*`, alongside the `.btn`, `.card`, `.field` and
 `.gold-rule` component classes. Change the palette there, not in the components.
 
+## Deploying
+
+Set two environment variables on the host — the build does not need them, but
+every request does:
+
+| Variable | Notes |
+| --- | --- |
+| `MONGODB_URI` | Must be reachable from the server. A local `127.0.0.1` mongod is not, so use Atlas (or another hosted MongoDB) in production. |
+| `ADMIN_SESSION_SECRET` | Any long random string. `openssl rand -base64 36`. Do not reuse the development one. |
+
+`ADMIN_SEED_EMAIL` / `ADMIN_SEED_PASSWORD` are only read by `npm run seed`, which
+you run once against the production database from your own machine.
+
+**The storefront renders per request** (`export const dynamic = "force-dynamic"`
+in the `(shop)` layout). Two reasons, both deliberate:
+
+- `next build` never touches MongoDB, so a deploy cannot fail because the
+  database was unreachable from the build machine.
+- The catalogue is edited live in the admin. Prerendering product pages at build
+  time meant a price change did not appear until the next deploy.
+
+If you later want the speed back, add ISR (`export const revalidate`) plus a
+`revalidatePath` call in the product write routes — do not reintroduce
+`generateStaticParams` over the database.
+
 ## Not wired up
 
 - **No payment gateway.** Checkout creates a real order and a transaction, but

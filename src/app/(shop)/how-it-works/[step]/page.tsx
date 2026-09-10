@@ -10,10 +10,6 @@ import { getProcess, getProducts } from "@/server/queries";
 
 const SCENES: SceneName[] = ["order", "market", "kitchen", "boxed", "doorstep"];
 
-export async function generateStaticParams() {
-  return (await getProcess()).map((s) => ({ step: s.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: {

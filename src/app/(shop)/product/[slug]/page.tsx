@@ -11,10 +11,6 @@ import SectionHead from "@/components/SectionHead";
 import { getProduct, getProducts, getCategories, getOccasions } from "@/server/queries";
 import { money, discountPct } from "@/lib/format";
 
-export async function generateStaticParams() {
-  return (await getProducts()).map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({
   params,
 }: {
