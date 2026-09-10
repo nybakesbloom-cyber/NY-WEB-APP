@@ -13,6 +13,7 @@ const NAV = [
   { href: "/admin/products", label: "Products", icon: "tag" },
   { href: "/admin/content", label: "Site content", icon: "text" },
   { href: "/admin/media", label: "Images", icon: "image" },
+  { href: "/admin/import", label: "Import & export", icon: "upload" },
 ];
 
 function Icon({ name }: { name: string }) {
@@ -25,6 +26,7 @@ function Icon({ name }: { name: string }) {
       {name === "tag" && <><path d="M4 11.6V4.5h7.1L20 13.4 13.4 20 4 11.6Z" /><circle cx="8.3" cy="8.3" r="1.4" /></>}
       {name === "text" && <><path d="M4 6h16M4 11h16M4 16h10" /></>}
       {name === "image" && <><rect x="3.5" y="4.5" width="17" height="15" rx="2.4" /><circle cx="8.6" cy="9.6" r="1.8" /><path d="m4 16 4.6-4.2L20 19" /></>}
+      {name === "upload" && <><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15" /><path d="M12 4v11M8 8l4-4 4 4" /></>}
     </svg>
   );
 }

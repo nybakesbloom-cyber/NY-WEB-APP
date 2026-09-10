@@ -47,6 +47,7 @@ login and every `/api/admin/*` route answers 401.
 | `/admin/products/[id]` | Price, weight options, copy, occasions, flags, and the photo |
 | `/admin/content` | The nine blocks of site copy |
 | `/admin/media` | Upload and manage photography |
+| `/admin/import` | Load the starter catalogue, import products from a file, export the catalogue |
 
 **Order processing** is a state machine, not a free-text field. `placed →
 in_kitchen → packed → out_for_delivery → delivered`, with `cancelled` available
@@ -68,6 +69,20 @@ reference products by slug and history must not break.
 dependency — no S3, no Cloudinary, nothing to configure before an upload works.
 Product photography sits well under Mongo's 16 MB document limit; the upload cap
 is 5 MB.
+
+**Getting data in without a terminal.** A fresh database has no staff account,
+so `/admin/login` offers to create the first one — and refuses the moment any
+account exists, so it closes itself permanently after one use. From there,
+**Import & export → Add what is missing** writes the same 24 products and 9
+content blocks the CLI seed writes. `npm run seed` remains available; it is no
+longer the only way.
+
+**Importing your own catalogue.** Upload a CSV or JSON file of products. Every
+row is validated before anything is written and a file with any bad row is
+rejected whole — a half-imported catalogue is worse than a rejected file. Rows
+match on `slug`, so exporting, editing in a spreadsheet and importing back
+updates rather than duplicates. Lists use `|` between values and weight options
+are `label:extra`, so `500 g:0|1 kg:550` means a kilo costs ₹550 more.
 
 **Site content** is nine editable blocks: `announcements`, `hero`, `promises`,
 `reviews`, `categories`, `occasions`, `process`, `footer`, `settings`. Saving one
