@@ -5,12 +5,75 @@ Bakingo / Black Tulip — category and occasion browsing, a product page with
 weight, flavour and gift-message options, a persisted cart, and a full checkout.
 
 ```bash
-npm run dev     # http://localhost:3000
+cp .env.example .env.local     # fill in MONGODB_URI and ADMIN_SESSION_SECRET
+npm run seed                   # catalogue, site copy and the first admin
+npm run dev                    # http://localhost:3000
 npm run build
 npm run lint
 ```
 
-Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
+Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4 · MongoDB via
+Mongoose.
+
+### MongoDB
+
+Any MongoDB will do — Atlas, or a local server. There is no Homebrew on the
+development Mac, so local Mongo is the official tarball rather than a package:
+
+```bash
+curl -sL -o /tmp/mongodb.tgz https://fastdl.mongodb.org/osx/mongodb-macos-arm64-8.0.30.tgz
+mkdir -p ~/.local/mongodb ~/.local/mongodb-data ~/.local/mongodb-logs
+tar -xzf /tmp/mongodb.tgz -C ~/.local/mongodb --strip-components=1
+~/.local/mongodb/bin/mongod --dbpath ~/.local/mongodb-data \
+  --logpath ~/.local/mongodb-logs/mongod.log --bind_ip 127.0.0.1 --fork
+```
+
+`npm run seed` is safe to re-run: it upserts by slug and key and leaves existing
+rows alone. `-- --force` overwrites them, `-- --demo-orders` adds a few orders
+to work with.
+
+## Admin panel
+
+`/admin`, behind an email and password. Signed out, `/admin/*` redirects to the
+login and every `/api/admin/*` route answers 401.
+
+| Page | What it does |
+| --- | --- |
+| `/admin` | Open orders, money collected, the pipeline, most-ordered, latest orders |
+| `/admin/orders` | Filter by status, search by order number, name, phone or city |
+| `/admin/orders/[id]` | Line items, fees, addresses, payments, kitchen note, full audit history, and the status controls |
+| `/admin/billing` | Every charge and refund, running totals, and a form to record either |
+| `/admin/products` | The catalogue; create, edit, archive |
+| `/admin/products/[id]` | Price, weight options, copy, occasions, flags, and the photo |
+| `/admin/content` | The nine blocks of site copy |
+| `/admin/media` | Upload and manage photography |
+
+**Order processing** is a state machine, not a free-text field. `placed →
+in_kitchen → packed → out_for_delivery → delivered`, with `cancelled` available
+until it ships. The API refuses anything else — a jump from `placed` straight to
+`delivered` comes back 422 — and every move is appended to the order's history
+with who made it.
+
+**Billing** records charges and refunds against an order. A refund is checked
+against what has actually been collected, so you cannot refund more than was
+paid.
+
+**Products** drive the shop directly. Edit a price and the shop page shows it.
+Attach an uploaded photo and it replaces the generated artwork on every surface;
+remove it and the artwork comes back. Deleting is a soft archive, because orders
+reference products by slug and history must not break.
+
+**Images** are stored in MongoDB as a Buffer on the document and served from
+`/api/media/[id]` with an immutable cache header. That keeps the whole app to one
+dependency — no S3, no Cloudinary, nothing to configure before an upload works.
+Product photography sits well under Mongo's 16 MB document limit; the upload cap
+is 5 MB.
+
+**Site content** is nine editable blocks: `announcements`, `hero`, `promises`,
+`reviews`, `categories`, `occasions`, `process`, `footer`, `settings`. Saving one
+calls `revalidatePath` so the public pages pick it up straight away. Flat string
+lists get a line-per-item editor; the rest are edited as JSON, which is honest
+about what they are rather than pretending a generated form covers every shape.
 
 ## Routes
 
@@ -24,6 +87,11 @@ Next.js 16 (App Router) · React 19 · TypeScript · Tailwind CSS v4.
 | `/order-confirmed` | Order number and a four-step delivery timeline |
 | `/how-it-works` | The five production stages, each linking to its own page |
 | `/how-it-works/[step]` | One stage in full: what happens, the numbers, what goes wrong |
+
+Public API: `POST /api/checkout` places an order, `GET /api/media/[id]` serves an
+image. **Checkout prices the order on the server** from the database — the browser
+sends slugs and quantities and nothing else, so a tampered cart cannot change what
+is charged.
 
 ## Motion
 
@@ -110,7 +178,27 @@ used in the pinned stage, plus the intro, sections, numbers and the honest
 illustrations live in `src/components/art/ProcessScene.tsx`, same approach as the
 product art — generated SVG, no photography.
 
-**Catalogue** — `src/lib/catalog.ts` holds 24 products, 5 categories and 8
+**Where the data lives** — `src/lib/catalog.ts` is types and pure helpers only.
+Products, categories, occasions and copy are in MongoDB. Server components read
+them through `src/server/queries.ts`; the client gets one snapshot from
+`<StoreProvider>`, mounted in the `(shop)` layout, so the cart and drawer can
+resolve a slug without another round trip. `scripts/seed-data.ts` is the original
+static catalogue, kept only as seed input.
+
+**Two module boundaries that matter**
+
+- Order vocabulary (`ORDER_STATUSES`, `NEXT_STATUS`, `STATUS_LABEL`) lives in
+  `src/lib/orders.ts`, not in the Mongoose model. Importing the model from a
+  client component drags mongoose — and Node builtins like `async_hooks`, `dns`
+  and `child_process` — into the browser bundle and the build fails.
+- `serverExternalPackages: ["mongoose"]` in `next.config.ts` keeps it out of the
+  bundler on the server side too.
+
+**Route groups** — `(shop)` carries the storefront chrome (header, footer, cart
+drawer, catalogue snapshot); `/admin` deliberately sits outside it so the admin
+does not inherit any of that. The root layout is only html, body and fonts.
+
+**Old catalogue note** — `src/lib/catalog.ts` no longer holds 24 products, 5 categories and 8
 occasions, plus `filterProducts()` and the delivery slots. It is the only place
 to edit to change what the shop sells.
 
@@ -127,7 +215,10 @@ message, so the same cake with two different messages is two lines.
 
 ## Not wired up
 
-It is a storefront, not a service: no backend, no payments, no auth. Checkout
-validates, computes real totals and then routes to a confirmation page without
-sending anything. The reminder form on the home page is inert. Prices, reviews
-and delivery claims are fixture data.
+- **No payment gateway.** Checkout creates a real order and a transaction, but
+  nothing is charged; a card payment is recorded as captured and cash on delivery
+  as pending.
+- **No email or SMS.** The receipt, the dispatch message and the handover photo
+  described in the copy do not send.
+- **No customer accounts.** Only staff sign in.
+- Prices, reviews and delivery claims are fixture data until you edit them.

@@ -1,12 +1,6 @@
 import type { Metadata } from "next";
 import { Playfair_Display, Manrope } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
-import { CartProvider } from "@/components/CartProvider";
-import CartDrawer from "@/components/CartDrawer";
-import CartToast from "@/components/CartToast";
-import ScrollProgress from "@/components/ScrollProgress";
 
 const display = Playfair_Display({
   subsets: ["latin"],
@@ -32,16 +26,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${display.variable} ${body.variable}`}>
-      <body className="min-h-screen">
-        <CartProvider>
-          <ScrollProgress />
-          <Header />
-          <main>{children}</main>
-          <Footer />
-          <CartDrawer />
-          <CartToast />
-        </CartProvider>
-      </body>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }

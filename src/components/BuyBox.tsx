@@ -5,11 +5,13 @@ import { useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { useCart } from "./CartProvider";
 import { money } from "@/lib/format";
-import { FREE_DELIVERY_OVER, productPrice, type Product } from "@/lib/catalog";
+import { productPrice, type Product } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 
 const noopSubscribe = () => () => {};
 
 export default function BuyBox({ product }: { product: Product }) {
+  const { settings } = useStore();
   const { add } = useCart();
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const router = useRouter();
@@ -141,9 +143,9 @@ export default function BuyBox({ product }: { product: Product }) {
             {money(price * qty)}
           </p>
           <p className="mt-1 text-[0.74rem] text-brand-700/60">
-            {price * qty >= FREE_DELIVERY_OVER
+            {price * qty >= settings.freeDeliveryOver
               ? "Free standard delivery included"
-              : `${money(FREE_DELIVERY_OVER - price * qty)} more for free delivery`}
+              : `${money(settings.freeDeliveryOver - price * qty)} more for free delivery`}
           </p>
         </div>
       </div>

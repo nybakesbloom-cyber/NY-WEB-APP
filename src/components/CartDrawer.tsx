@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useEffect, useRef } from "react";
 import ProductArt from "./art/ProductArt";
+import ProductImage from "./ProductImage";
 import { useCart, unitPrice } from "./CartProvider";
 import { money } from "@/lib/format";
-import { FREE_DELIVERY_OVER, getProduct } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 
 export default function CartDrawer() {
+  const { getProduct, settings } = useStore();
   const { drawerOpen, closeDrawer, lines, subtotal, count, setQty, remove } = useCart();
   const panel = useRef<HTMLDivElement>(null);
 
@@ -23,8 +25,8 @@ export default function CartDrawer() {
 
   if (!drawerOpen) return null;
 
-  const toFree = FREE_DELIVERY_OVER - subtotal;
-  const progress = Math.min(100, (subtotal / FREE_DELIVERY_OVER) * 100);
+  const toFree = settings.freeDeliveryOver - subtotal;
+  const progress = Math.min(100, (subtotal / settings.freeDeliveryOver) * 100);
 
   return (
     <div className="fixed inset-0 z-[100]" role="dialog" aria-modal="true" aria-label="Your cart">
@@ -106,7 +108,7 @@ export default function CartDrawer() {
                       onClick={closeDrawer}
                       className="w-16 shrink-0 overflow-hidden rounded-lg"
                     >
-                      <ProductArt kind={product.art} hues={product.hues} seed={product.slug} className="w-full" />
+                      <ProductImage product={product} sizes="64px" className="w-full" />
                     </Link>
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-[0.88rem] font-semibold text-brand-900">
@@ -136,7 +138,7 @@ export default function CartDrawer() {
                           </button>
                         </div>
                         <span className="text-[0.86rem] font-semibold text-brand-900">
-                          {money(unitPrice(line) * line.qty)}
+                          {money(unitPrice(line, product) * line.qty)}
                         </span>
                       </div>
                     </div>

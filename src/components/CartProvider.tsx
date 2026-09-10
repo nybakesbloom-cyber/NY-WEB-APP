@@ -10,7 +10,8 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
-import { getProduct, productPrice } from "@/lib/catalog";
+import { productPrice, type Product } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 
 export type CartLine = {
   id: string;
@@ -46,8 +47,7 @@ function lineId(l: Omit<CartLine, "id">) {
   return [l.slug, l.variant, l.flavour ?? "", l.message ?? ""].join("|");
 }
 
-export function unitPrice(line: CartLine) {
-  const product = getProduct(line.slug);
+export function unitPrice(line: CartLine, product?: Product) {
   if (!product) return 0;
   return productPrice(product, line.variant);
 }
@@ -59,9 +59,7 @@ function loadStored(): CartLine[] {
   if (typeof window === "undefined") return EMPTY;
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return EMPTY;
-    // Drop anything whose product has since left the catalogue.
-    return (JSON.parse(raw) as CartLine[]).filter((l) => getProduct(l.slug));
+    return raw ? (JSON.parse(raw) as CartLine[]) : EMPTY;
   } catch {
     /* private mode, cleared storage — start empty */
     return EMPTY;
@@ -74,12 +72,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
    * empty one — and only then reveal what is in storage. `useSyncExternalStore`
    * gives that gate without a setState-in-effect round trip.
    */
+  const { bySlug } = useStore();
   const ready = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const [stored, setLines] = useState<CartLine[]>(loadStored);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [toast, setToast] = useState<CartLine | null>(null);
   const toastTimer = useRef<number | undefined>(undefined);
-  const lines = ready ? stored : EMPTY;
+  const lines = useMemo(
+    () => (ready ? stored.filter((l) => bySlug.has(l.slug)) : EMPTY),
+    [ready, stored, bySlug],
+  );
 
   useEffect(() => {
     if (!ready) return;
@@ -135,7 +137,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
   const value = useMemo<CartState>(() => {
     const count = lines.reduce((n, l) => n + l.qty, 0);
-    const subtotal = lines.reduce((n, l) => n + unitPrice(l) * l.qty, 0);
+    const subtotal = lines.reduce((n, l) => n + unitPrice(l, bySlug.get(l.slug)) * l.qty, 0);
     return {
       lines, ready, count, subtotal,
       add, setQty, remove, clear,
@@ -143,7 +145,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       toast, dismissToast,
     };
   }, [
-    lines, ready, add, setQty, remove, clear,
+    lines, ready, bySlug, add, setQty, remove, clear,
     drawerOpen, openDrawer, closeDrawer, toast, dismissToast,
   ]);
 

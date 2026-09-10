@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import Countdown from "./Countdown";
 import Logo from "./Logo";
-import { CATEGORIES, OCCASIONS } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 import { useCart } from "./CartProvider";
 
 const CITIES = ["Bengaluru", "Mumbai", "Delhi NCR", "Hyderabad", "Chennai", "Pune", "Kolkata"];
@@ -21,6 +21,7 @@ function CartIcon({ className = "" }: { className?: string }) {
 }
 
 export default function Header() {
+  const { categories, occasions, announcements } = useStore();
   const { count, ready, openDrawer } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -66,12 +67,10 @@ export default function Header() {
       <div className="overflow-hidden bg-brand-900 py-2 text-[0.72rem] font-medium tracking-wide text-gold-200">
         <div className="marquee-track flex w-max gap-12 whitespace-nowrap pl-4">
           {[0, 1].map((k) => (
-            <span key={k} className="flex gap-12">
-              <span>✦ Same-day delivery in 7 cities — order before 6 PM</span>
-              <span>✦ Midnight delivery available for birthdays</span>
-              <span>✦ Free delivery over ₹1,499</span>
-              <span>✦ Flowers cut the morning they are delivered</span>
-              <span>✦ 100% eggless options on every cake</span>
+            <span key={k} className="flex gap-12" aria-hidden={k === 1}>
+              {announcements.map((line, i) => (
+                <span key={i}>✦ {line}</span>
+              ))}
             </span>
           ))}
         </div>
@@ -173,7 +172,7 @@ export default function Header() {
             open={menu === "cat"}
             onToggle={() => setMenu(menu === "cat" ? null : "cat")}
           >
-            {CATEGORIES.map((c) => (
+            {categories.map((c) => (
               <Link key={c.slug} href={`/shop?category=${c.slug}`} className="group block rounded-lg px-3 py-2.5 hover:bg-brand-50">
                 <span className="block font-semibold text-brand-800 group-hover:text-brand-900">{c.name}</span>
                 <span className="block text-xs font-normal text-brand-600">{c.blurb}</span>
@@ -187,7 +186,7 @@ export default function Header() {
             onToggle={() => setMenu(menu === "occ" ? null : "occ")}
             wide
           >
-            {OCCASIONS.map((o) => (
+            {occasions.map((o) => (
               <Link key={o.slug} href={`/shop?occasion=${o.slug}`} className="group block rounded-lg px-3 py-2.5 hover:bg-brand-50">
                 <span className="block font-semibold text-brand-800">{o.name}</span>
                 <span className="block text-xs font-normal text-brand-600">{o.blurb}</span>
@@ -228,7 +227,7 @@ export default function Header() {
             </form>
             <p className="eyebrow mb-2">Categories</p>
             <div className="mb-4 grid grid-cols-2 gap-1.5">
-              {CATEGORIES.map((c) => (
+              {categories.map((c) => (
                 <Link
                   key={c.slug}
                   href={`/shop?category=${c.slug}`}
@@ -246,7 +245,7 @@ export default function Header() {
             </Link>
             <p className="eyebrow mb-2">Occasions</p>
             <div className="grid grid-cols-2 gap-1.5">
-              {OCCASIONS.map((o) => (
+              {occasions.map((o) => (
                 <Link
                   key={o.slug}
                   href={`/shop?occasion=${o.slug}`}

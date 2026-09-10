@@ -1,13 +1,23 @@
 import Link from "next/link";
 import Logo from "./Logo";
-import { CATEGORIES, OCCASIONS } from "@/lib/catalog";
+import { getCategories, getOccasions, getContent } from "@/server/queries";
 
-const CITIES = [
-  "Bengaluru", "Mumbai", "Delhi NCR", "Hyderabad", "Chennai",
-  "Pune", "Kolkata", "Ahmedabad", "Jaipur", "Kochi", "Chandigarh", "Lucknow",
-];
+type FooterContent = {
+  blurb: string;
+  cities: string[];
+  help: string[];
+  legal: string;
+};
 
-export default function Footer() {
+const FALLBACK: FooterContent = { blurb: "", cities: [], help: [], legal: "" };
+
+export default async function Footer() {
+  const [CATEGORIES, OCCASIONS, content] = await Promise.all([
+    getCategories(),
+    getOccasions(),
+    getContent<FooterContent>("footer", FALLBACK),
+  ]);
+  const CITIES = content.cities;
   return (
     <footer className="mt-24 bg-brand-900 text-gold-100">
       <div className="gold-rule" />
@@ -16,8 +26,7 @@ export default function Footer() {
         <div className="lg:col-span-2">
           <Logo tone="dark" />
           <p className="mt-4 max-w-sm text-sm leading-relaxed text-gold-100/70">
-            We bake in our own kitchens and buy our stems at the morning market. Everything is
-            made the day it is delivered — which is why we cap how many orders we take.
+{content.blurb}
           </p>
           <div className="mt-6 flex gap-2.5">
             {["Instagram", "Facebook", "X", "WhatsApp"].map((s) => (
@@ -77,14 +86,7 @@ export default function Footer() {
                 How it is made
               </Link>
             </li>
-            {[
-              "Track your order",
-              "Delivery & slots",
-              "Substitution policy",
-              "Cancellations",
-              "Corporate gifting",
-              "Contact us",
-            ].map((t) => (
+            {content.help.map((t) => (
               <li key={t}>
                 <span className="cursor-default transition hover:text-gold-300">{t}</span>
               </li>
@@ -103,7 +105,9 @@ export default function Footer() {
       </div>
 
       <div className="wrap flex flex-col gap-3 border-t border-gold-500/15 py-6 text-[0.78rem] text-gold-100/50 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()} NY Bakes and Bloom. A Felicet Technologies storefront.</p>
+        <p>
+          © {new Date().getFullYear()} NY Bakes and Bloom. {content.legal}
+        </p>
         <p className="flex gap-5">
           <span>Terms</span>
           <span>Privacy</span>

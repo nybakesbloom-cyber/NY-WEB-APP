@@ -1,5 +1,5 @@
 import Link from "next/link";
-import ProductArt from "./art/ProductArt";
+import ProductImage from "./ProductImage";
 import type { Product } from "@/lib/catalog";
 
 /**
@@ -36,10 +36,9 @@ export default function FlowStrip({
             className={`group relative shrink-0 ${size}`}
           >
             <div className="overflow-hidden rounded-2xl border border-gold-400/25 bg-white shadow-[0_18px_36px_-26px_rgba(11,61,46,0.6)] transition duration-500 group-hover:border-gold-500 group-hover:shadow-[0_26px_48px_-24px_rgba(11,61,46,0.6)]">
-              <ProductArt
-                kind={p.art}
-                hues={p.hues}
-                seed={p.slug}
+              <ProductImage
+                product={p}
+                sizes="230px"
                 className="w-full transition duration-700 group-hover:scale-110"
               />
               <div className="flex items-center justify-between gap-2 border-t border-brand-800/8 px-3 py-2.5">

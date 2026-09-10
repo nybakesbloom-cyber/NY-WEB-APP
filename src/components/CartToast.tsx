@@ -1,12 +1,13 @@
 "use client";
 
-import ProductArt from "./art/ProductArt";
+import ProductImage from "./ProductImage";
 import { useCart, unitPrice } from "./CartProvider";
 import { money } from "@/lib/format";
-import { getProduct } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 
 /** Confirms an add-to-cart without yanking the shopper off the page. */
 export default function CartToast() {
+  const { getProduct } = useStore();
   const { toast, dismissToast, openDrawer, drawerOpen } = useCart();
   if (!toast || drawerOpen) return null;
 
@@ -21,7 +22,7 @@ export default function CartToast() {
     >
       <div className="flex items-center gap-3 rounded-2xl border border-gold-400/50 bg-white p-3 shadow-[0_26px_54px_-22px_rgba(11,61,46,0.6)]">
         <div className="w-14 shrink-0 overflow-hidden rounded-xl">
-          <ProductArt kind={product.art} hues={product.hues} seed={product.slug} className="w-full" />
+          <ProductImage product={product} sizes="56px" className="w-full" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-[0.68rem] font-bold uppercase tracking-[0.16em] text-brand-600">
@@ -32,7 +33,7 @@ export default function CartToast() {
           </p>
           <p className="truncate text-[0.88rem] font-semibold text-brand-900">{product.name}</p>
           <p className="truncate text-[0.74rem] text-brand-700/65">
-            {toast.variant} · {money(unitPrice(toast) * toast.qty)}
+            {toast.variant} · {money(unitPrice(toast, product) * toast.qty)}
           </p>
         </div>
         <div className="flex shrink-0 flex-col gap-1.5">

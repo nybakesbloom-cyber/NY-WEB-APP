@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import ProductArt from "./art/ProductArt";
+import ProductImage from "./ProductImage";
 import Stars from "./Stars";
 import { useCart } from "./CartProvider";
 import { money, discountPct } from "@/lib/format";
@@ -31,10 +31,8 @@ export default function ProductCard({ product }: { product: Product }) {
       className="card group flex h-full flex-col"
     >
       <div className="relative">
-        <ProductArt
-          kind={product.art}
-          hues={product.hues}
-          seed={product.slug}
+        <ProductImage
+          product={product}
           className="aspect-square w-full transition duration-500 group-hover:scale-[1.04]"
         />
 

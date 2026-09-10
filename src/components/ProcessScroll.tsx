@@ -3,11 +3,10 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import ProcessScene, { type SceneName } from "./art/ProcessScene";
-import { PROCESS } from "@/lib/process";
+import type { ProcessStep } from "@/lib/process";
 import { useReducedMotion } from "@/lib/media";
 
 const SCENES: SceneName[] = ["order", "market", "kitchen", "boxed", "doorstep"];
-const N = PROCESS.length;
 
 /**
  * A tall section with a pinned stage inside it. Scrolling through the section
@@ -15,7 +14,10 @@ const N = PROCESS.length;
  * marker in CSS, and advances the phase copy in React. Under
  * `prefers-reduced-motion` the whole thing renders as a plain stacked list.
  */
-export default function ProcessScroll() {
+export default function ProcessScroll({ steps }: { steps: ProcessStep[] }) {
+  const PROCESS = steps;
+  const N = PROCESS.length;
+
   const outer = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState(0);
@@ -58,9 +60,9 @@ export default function ProcessScroll() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [reduced]);
+  }, [reduced, N]);
 
-  if (reduced) return <StackedFallback />;
+  if (reduced) return <StackedFallback steps={PROCESS} />;
 
   const step = PROCESS[phase];
 
@@ -201,7 +203,9 @@ export default function ProcessScroll() {
 }
 
 /** No pinning, no scrubbing — just the five stages, in order. */
-function StackedFallback() {
+function StackedFallback({ steps }: { steps: ProcessStep[] }) {
+  const PROCESS = steps;
+
   return (
     <section aria-label="How your order is made" className="bg-brand-900 py-16">
       <div className="wrap">

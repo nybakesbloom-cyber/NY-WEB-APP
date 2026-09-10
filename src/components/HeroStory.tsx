@@ -1,13 +1,23 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
-import ProductArt from "./art/ProductArt";
+import { useEffect, useMemo, useRef, useState } from "react";
+import ProductImage from "./ProductImage";
 import ProcessScene from "./art/ProcessScene";
-import { getProduct } from "@/lib/catalog";
+import { useStore } from "./StoreProvider";
 import { useReducedMotion } from "@/lib/media";
 
-const CHAPTERS = [
+export type HeroChapter = { clock: string; label: string; line: string; at: number; to: number };
+export type HeroWord = { text: string; gold?: boolean; from: number; to: number };
+export type HeroContent = {
+  eyebrow: string;
+  words: HeroWord[];
+  chapters: HeroChapter[];
+  primary: { label: string; href: string };
+  secondary: { label: string; href: string };
+};
+
+const FALLBACK_CHAPTERS: HeroChapter[] = [
   { clock: "05:00", label: "The market opens", line: "Stems off the floor before the heat, graded by head size.", at: -0.3, to: 0.22 },
   { clock: "06:00", label: "The oven goes on", line: "Baked to your order, then two hours of doing nothing.", at: 0.22, to: 0.44 },
   { clock: "14:00", label: "Iced and sealed", line: "Gold leaf laid by hand. The box is photographed shut.", at: 0.44, to: 0.64 },
@@ -15,7 +25,7 @@ const CHAPTERS = [
   { clock: "23:52", label: "At the door", line: "Median midnight drop. The handover reaches your phone.", at: 0.82, to: 1.01 },
 ];
 
-const WORDS: { text: string; gold?: boolean; from: number; to: number }[] = [
+const FALLBACK_WORDS: HeroWord[] = [
   { text: "Cakes and flowers,", from: -0.2, to: 0 },
   { text: "made the day", gold: true, from: 0.3, to: 0.44 },
   { text: "they reach the door.", from: 0.72, to: 0.86 },
@@ -24,7 +34,18 @@ const WORDS: { text: string; gold?: boolean; from: number; to: number }[] = [
 /** Elements read these as plain numbers inside calc(); see .cue / .beat in globals.css */
 const v = (o: Record<string, number | string>) => o as React.CSSProperties;
 
-export default function HeroStory() {
+export default function HeroStory({ content }: { content?: Partial<HeroContent> }) {
+  const { getProduct } = useStore();
+  // Memoised so the scroll effect is not torn down and rebuilt every render.
+  const CHAPTERS = useMemo(
+    () => (content?.chapters?.length ? content.chapters : FALLBACK_CHAPTERS),
+    [content],
+  );
+  const WORDS = content?.words?.length ? content.words : FALLBACK_WORDS;
+  const EYEBROW = content?.eyebrow ?? "Est. 2019 · 12 cities · 1.4 lakh deliveries";
+  const PRIMARY = content?.primary ?? { label: "Shop cakes", href: "/shop?category=cakes" };
+  const SECONDARY = content?.secondary ?? { label: "Shop flowers", href: "/shop?category=flowers" };
+
   const track = useRef<HTMLDivElement>(null);
   const stage = useRef<HTMLDivElement>(null);
   const [chapter, setChapter] = useState(0);
@@ -66,12 +87,12 @@ export default function HeroStory() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
     };
-  }, [reduced]);
+  }, [reduced, CHAPTERS]);
 
   if (reduced) return <StaticHero />;
 
-  const roses = getProduct("hundred-red-roses")!;
-  const cake = getProduct("midnight-truffle-cake")!;
+  const roses = getProduct("hundred-red-roses");
+  const cake = getProduct("midnight-truffle-cake");
 
   return (
     <section
@@ -165,7 +186,7 @@ export default function HeroStory() {
                 className="cue eyebrow text-gold-400"
                 style={v({ "--from": -0.2, "--to": 0, "--dy": "16px" })}
               >
-                Est. 2019 · 12 cities · 1.4 lakh deliveries
+                {EYEBROW}
               </p>
 
               <h1 className="mt-3 font-display text-[2rem] font-semibold leading-[1.06] tracking-tight text-gold-50 sm:text-[2.9rem] lg:text-[3.3rem]">
@@ -206,14 +227,14 @@ export default function HeroStory() {
                 className="cue mt-6 flex flex-wrap gap-3"
                 style={v({ "--from": -0.2, "--to": 0, "--dy": "22px" })}
               >
-                <Link href="/shop?category=cakes" className="btn btn-gold sheen px-6 py-3 text-sm sm:px-7 sm:py-3.5">
-                  <span className="relative z-10">Shop cakes</span>
+                <Link href={PRIMARY.href} className="btn btn-gold sheen px-6 py-3 text-sm sm:px-7 sm:py-3.5">
+                  <span className="relative z-10">{PRIMARY.label}</span>
                 </Link>
                 <Link
-                  href="/shop?category=flowers"
+                  href={SECONDARY.href}
                   className="btn border border-gold-400/50 px-6 py-3 text-sm text-gold-100 transition hover:bg-gold-400/10 sm:px-7 sm:py-3.5"
                 >
-                  Shop flowers
+                  {SECONDARY.label}
                 </Link>
               </div>
             </div>
@@ -221,12 +242,16 @@ export default function HeroStory() {
             {/* --------------------------------------------------- film */}
             <div className="relative order-1 mx-auto w-full max-w-[210px] sm:max-w-[320px] lg:order-2 lg:max-w-[440px]">
               <div className="camera relative aspect-square" style={v({ "--zoom": 0.18 })}>
-                <Frame a={-0.3} b={0.36} dx="-90px" dy="30px">
-                  <ProductArt kind={roses.art} hues={roses.hues} seed={roses.slug} className="h-full w-full" />
-                </Frame>
-                <Frame a={0.24} b={0.58} dy="90px">
-                  <ProductArt kind={cake.art} hues={cake.hues} seed={cake.slug} className="h-full w-full" />
-                </Frame>
+                {roses && (
+                  <Frame a={-0.3} b={0.36} dx="-90px" dy="30px">
+                    <ProductImage product={roses} sizes="440px" priority className="h-full w-full" />
+                  </Frame>
+                )}
+                {cake && (
+                  <Frame a={0.24} b={0.58} dy="90px">
+                    <ProductImage product={cake} sizes="440px" className="h-full w-full" />
+                  </Frame>
+                )}
                 <Frame a={0.46} b={0.76} dy="60px">
                   <ProcessScene name="boxed" className="h-full w-full" />
                 </Frame>
@@ -377,7 +402,8 @@ const PETALS: [number, number, string, number, number, number][] = [
 
 /** Everything the sequence lands on, without the sequence. */
 function StaticHero() {
-  const roses = getProduct("hundred-red-roses")!;
+  const { getProduct } = useStore();
+  const roses = getProduct("hundred-red-roses");
   return (
     <section className="relative overflow-hidden bg-brand-800">
       <div
@@ -408,9 +434,11 @@ function StaticHero() {
             </Link>
           </div>
         </div>
-        <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.4rem] border border-gold-400/35 bg-cream">
-          <ProductArt kind={roses.art} hues={roses.hues} seed={roses.slug} className="w-full" />
-        </div>
+        {roses && (
+          <div className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.4rem] border border-gold-400/35 bg-cream">
+            <ProductImage product={roses} sizes="440px" priority className="w-full" />
+          </div>
+        )}
       </div>
     </section>
   );
