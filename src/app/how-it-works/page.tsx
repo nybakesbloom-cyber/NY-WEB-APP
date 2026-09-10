@@ -9,7 +9,7 @@ const SCENES: SceneName[] = ["order", "market", "kitchen", "boxed", "doorstep"];
 export const metadata: Metadata = {
   title: "How it is made",
   description:
-    "The five stages every Felicet Bloom order goes through, from the moment you check out to the photograph at the door.",
+    "The five stages every NY Bakes and Bloom order goes through, from the moment you check out to the photograph at the door.",
 };
 
 export default function HowItWorksPage() {

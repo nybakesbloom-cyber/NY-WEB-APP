@@ -103,7 +103,7 @@ export default function Footer() {
       </div>
 
       <div className="wrap flex flex-col gap-3 border-t border-gold-500/15 py-6 text-[0.78rem] text-gold-100/50 sm:flex-row sm:items-center sm:justify-between">
-        <p>© {new Date().getFullYear()} Felicet Bloom. A Felicet Technologies storefront.</p>
+        <p>© {new Date().getFullYear()} NY Bakes and Bloom. A Felicet Technologies storefront.</p>
         <p className="flex gap-5">
           <span>Terms</span>
           <span>Privacy</span>

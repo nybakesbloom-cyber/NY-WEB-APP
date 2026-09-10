@@ -44,7 +44,7 @@ export default function CheckoutPage() {
     const orderId = `FB${Math.floor(100000 + Math.random() * 899999)}`;
     try {
       window.sessionStorage.setItem(
-        "felicet-bloom-last-order",
+        "ny-bakes-and-bloom-last-order",
         JSON.stringify({ orderId, total, count, date, slot }),
       );
     } catch {

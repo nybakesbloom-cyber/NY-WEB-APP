@@ -17,16 +17,16 @@ export default function Logo({ className = "", tone = "light" }: { className?: s
       </svg>
       <span className="leading-none">
         <span
-          className="block font-display text-[1.35rem] font-semibold tracking-tight"
+          className="block whitespace-nowrap font-display text-[1.2rem] font-semibold tracking-tight sm:text-[1.3rem]"
           style={{ color: word }}
         >
-          Felicet <span style={{ color: mark }}>Bloom</span>
+          NY Bakes <span style={{ color: mark }}>and Bloom</span>
         </span>
         <span
-          className="mt-0.5 block text-[0.58rem] font-semibold uppercase tracking-[0.28em]"
+          className="mt-0.5 block text-[0.55rem] font-semibold uppercase tracking-[0.24em] sm:text-[0.58rem] sm:tracking-[0.28em]"
           style={{ color: sub }}
         >
-          Cakes & Flowers
+          Cakes &amp; Flowers
         </span>
       </span>
     </span>

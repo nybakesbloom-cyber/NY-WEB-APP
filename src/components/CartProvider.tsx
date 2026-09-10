@@ -40,7 +40,7 @@ type CartState = {
 };
 
 const CartContext = createContext<CartState | null>(null);
-const KEY = "felicet-bloom-cart-v1";
+const KEY = "ny-bakes-and-bloom-cart-v1";
 
 function lineId(l: Omit<CartLine, "id">) {
   return [l.slug, l.variant, l.flavour ?? "", l.message ?? ""].join("|");

@@ -22,8 +22,8 @@ const body = Manrope({
 
 export const metadata: Metadata = {
   title: {
-    default: "Felicet Bloom — Cakes & Flowers, delivered the day they're made",
-    template: "%s · Felicet Bloom",
+    default: "NY Bakes and Bloom — Cakes & Flowers, delivered the day they're made",
+    template: "%s · NY Bakes and Bloom",
   },
   description:
     "Hand-iced cakes and morning-cut flowers delivered same-day across 12 Indian cities. Midnight delivery, eggless options, and combos that arrive in one slot.",

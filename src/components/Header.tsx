@@ -102,7 +102,7 @@ export default function Header() {
             </svg>
           </button>
 
-          <Link href="/" aria-label="Felicet Bloom home">
+          <Link href="/" aria-label="NY Bakes and Bloom home">
             <Logo />
           </Link>
 

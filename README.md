@@ -1,4 +1,4 @@
-# Felicet Bloom
+# NY Bakes and Bloom
 
 A cakes-and-flowers storefront in emerald and gold, in the shape of FlowerAura /
 Bakingo / Black Tulip — category and occasion browsing, a product page with

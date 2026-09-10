@@ -53,7 +53,7 @@ export const PROCESS: ProcessStep[] = [
       "Stems are bought the morning they are delivered, graded by head size on the floor, and rejected on the spot if they are soft.",
     clock: "05:00",
     intro:
-      "Flowers are bought fresh every morning at the wholesale market, before the day's heat. Nothing in a Felicet Bloom bouquet has been sitting in a cold room for a week waiting for a buyer.",
+      "Flowers are bought fresh every morning at the wholesale market, before the day's heat. Nothing in an NY Bakes and Bloom bouquet has been sitting in a cold room for a week waiting for a buyer.",
     detail: [
       {
         heading: "Graded, not just counted",

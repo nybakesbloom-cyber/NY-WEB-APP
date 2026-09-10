@@ -19,7 +19,7 @@ const noopSubscribe = () => () => {};
 
 function readLastOrder() {
   try {
-    return window.sessionStorage.getItem("felicet-bloom-last-order");
+    return window.sessionStorage.getItem("ny-bakes-and-bloom-last-order");
   } catch {
     /* nothing stored — show the id from the URL only */
     return null;
