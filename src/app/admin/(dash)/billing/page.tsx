@@ -6,7 +6,7 @@ import { Suspense, useState } from "react";
 import { money } from "@/lib/format";
 import {
   useApi, send, PageHead, Panel, Stat, Badge, Field, Toolbar, Chip,
-  Loading, ErrorBox, Empty,
+  Loading, ErrorBox, Empty, Pager, type Paged,
 } from "@/components/admin/ui";
 
 type Txn = {
@@ -15,8 +15,7 @@ type Txn = {
   reference: string; note: string; createdAt: string;
 };
 
-type Payload = {
-  items: Txn[];
+type Payload = Paged<Txn> & {
   totals: { collected: number; refunded: number; pending: number; net: number };
 };
 
@@ -28,8 +27,14 @@ function BillingInner() {
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [done, setDone] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-  const url = `/api/admin/transactions?kind=${kind}${applied ? `&q=${encodeURIComponent(applied)}` : ""}`;
+  const url = `/api/admin/transactions?kind=${kind}&page=${page}${applied ? `&q=${encodeURIComponent(applied)}` : ""}`;
+
+  const filter = (fn: () => void) => {
+    fn();
+    setPage(1);
+  };
   const { data, error, loading, reload } = useApi<Payload>(url);
 
   async function record(e: React.FormEvent<HTMLFormElement>) {
@@ -49,6 +54,7 @@ function BillingInner() {
       });
       (e.target as HTMLFormElement).reset();
       setDone("Recorded.");
+      setPage(1);
       await reload();
     } catch (err) {
       setProblem(err instanceof Error ? err.message : "Could not record that");
@@ -72,12 +78,12 @@ function BillingInner() {
         <div>
           <Toolbar>
             {["all", "charge", "refund"].map((k) => (
-              <Chip key={k} active={kind === k} onClick={() => setKind(k)}>
+              <Chip key={k} active={kind === k} onClick={() => filter(() => setKind(k))}>
                 {k === "all" ? "Everything" : k === "charge" ? "Charges" : "Refunds"}
               </Chip>
             ))}
             <form
-              onSubmit={(e) => { e.preventDefault(); setApplied(q.trim()); }}
+              onSubmit={(e) => { e.preventDefault(); filter(() => setApplied(q.trim())); }}
               className="ml-auto flex gap-2"
             >
               <input
@@ -123,6 +129,7 @@ function BillingInner() {
               ))}
             </div>
           )}
+          {data && <Pager data={data} onPage={setPage} noun="transactions" />}
         </div>
 
         <Panel title="Record a payment or refund">

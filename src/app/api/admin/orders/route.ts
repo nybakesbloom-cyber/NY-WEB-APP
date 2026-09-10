@@ -1,5 +1,5 @@
 import { Order } from "@/server/models/Order";
-import { withAdmin, query, json } from "@/server/api";
+import { withAdmin, query, json, paging, findPaged } from "@/server/api";
 
 export const GET = withAdmin(async ({ req }) => {
   const q = query(req);
@@ -19,16 +19,14 @@ export const GET = withAdmin(async ({ req }) => {
     ];
   }
 
-  const limit = Math.min(Number(q.get("limit") ?? 100), 200);
-  const items = await Order.find(filter).sort({ createdAt: -1 }).limit(limit).lean();
-
-  const counts = await Order.aggregate([
-    { $group: { _id: "$status", n: { $sum: 1 } } },
+  const [result, counts] = await Promise.all([
+    findPaged(
+      () => Order.countDocuments(filter),
+      (skip, limit) => Order.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      paging(req),
+    ),
+    Order.aggregate([{ $group: { _id: "$status", n: { $sum: 1 } } }]),
   ]);
 
-  return json({
-    items,
-    total: items.length,
-    counts: Object.fromEntries(counts.map((c) => [c._id, c.n])),
-  });
+  return json({ ...result, counts: Object.fromEntries(counts.map((c) => [c._id, c.n])) });
 });

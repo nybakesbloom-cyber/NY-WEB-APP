@@ -1,5 +1,5 @@
 import { Product } from "@/server/models/Product";
-import { withAdmin, body, query, json, fail } from "@/server/api";
+import { withAdmin, body, query, json, fail, paging, findPaged } from "@/server/api";
 
 export const GET = withAdmin(async ({ req }) => {
   const q = query(req);
@@ -20,8 +20,13 @@ export const GET = withAdmin(async ({ req }) => {
     ];
   }
 
-  const items = await Product.find(filter).sort({ sort: 1, name: 1 }).lean();
-  return json({ items, total: items.length });
+  return json(
+    await findPaged(
+      () => Product.countDocuments(filter),
+      (skip, limit) => Product.find(filter).sort({ sort: 1, name: 1 }).skip(skip).limit(limit).lean(),
+      paging(req, 24),
+    ),
+  );
 });
 
 export const POST = withAdmin(async ({ req }) => {

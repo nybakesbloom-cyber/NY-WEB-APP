@@ -5,7 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 import { money } from "@/lib/format";
 import { ORDER_STATUSES, STATUS_LABEL, type OrderStatus } from "@/lib/orders";
-import { useApi, PageHead, Badge, Toolbar, Chip, Loading, ErrorBox, Empty } from "@/components/admin/ui";
+import { useApi, PageHead, Badge, Toolbar, Chip, Loading, ErrorBox, Empty, Pager, type Paged } from "@/components/admin/ui";
 
 type OrderRow = {
   _id: string;
@@ -26,25 +26,31 @@ function OrdersInner() {
   const [status, setStatus] = useState<string>(params.get("status") ?? "all");
   const [q, setQ] = useState("");
   const [applied, setApplied] = useState("");
+  const [page, setPage] = useState(1);
 
-  const url = `/api/admin/orders?status=${encodeURIComponent(status)}${
+  const url = `/api/admin/orders?status=${encodeURIComponent(status)}&page=${page}${
     applied ? `&q=${encodeURIComponent(applied)}` : ""
   }`;
-  const { data, error, loading, reload } = useApi<{
-    items: OrderRow[];
-    counts: Record<string, number>;
-  }>(url);
+  const { data, error, loading, reload } = useApi<
+    Paged<OrderRow> & { counts: Record<string, number> }
+  >(url);
+
+  // Any change of filter puts you back on the first page.
+  const filter = (fn: () => void) => {
+    fn();
+    setPage(1);
+  };
 
   return (
     <>
       <PageHead title="Orders" sub="Move an order along as it goes through the kitchen and out the door." />
 
       <Toolbar>
-        <Chip active={status === "all"} onClick={() => setStatus("all")}>
-          All{data ? ` (${data.items.length})` : ""}
+        <Chip active={status === "all"} onClick={() => filter(() => setStatus("all"))}>
+          All{data ? ` (${data.total})` : ""}
         </Chip>
         {ORDER_STATUSES.map((s) => (
-          <Chip key={s} active={status === s} onClick={() => setStatus(s)}>
+          <Chip key={s} active={status === s} onClick={() => filter(() => setStatus(s))}>
             {STATUS_LABEL[s]}
             {data?.counts?.[s] ? ` (${data.counts[s]})` : ""}
           </Chip>
@@ -53,7 +59,7 @@ function OrdersInner() {
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            setApplied(q.trim());
+            filter(() => setApplied(q.trim()));
           }}
           className="ml-auto flex gap-2"
         >
@@ -110,6 +116,7 @@ function OrdersInner() {
               <span className="font-semibold text-brand-900 lg:text-right">{money(o.total)}</span>
             </Link>
           ))}
+          <Pager data={data} onPage={setPage} noun="orders" />
         </div>
       )}
     </>

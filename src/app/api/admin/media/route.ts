@@ -1,5 +1,5 @@
 import { Media } from "@/server/models/Media";
-import { withAdmin, query, json, fail } from "@/server/api";
+import { withAdmin, query, json, fail, paging, findPaged } from "@/server/api";
 
 const MAX_BYTES = 5 * 1024 * 1024;
 const ALLOWED = ["image/jpeg", "image/png", "image/webp", "image/avif", "image/svg+xml", "image/gif"];
@@ -8,12 +8,14 @@ export const GET = withAdmin(async ({ req }) => {
   const search = query(req).get("q")?.trim();
   const filter = search ? { filename: { $regex: search, $options: "i" } } : {};
   // Never ship the binary in a listing.
-  const items = await Media.find(filter)
-    .select("-data")
-    .sort({ createdAt: -1 })
-    .limit(200)
-    .lean();
-  return json({ items });
+  return json(
+    await findPaged(
+      () => Media.countDocuments(filter),
+      (skip, limit) =>
+        Media.find(filter).select("-data").sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+      paging(req, 24),
+    ),
+  );
 });
 
 export const POST = withAdmin(async ({ req, session }) => {

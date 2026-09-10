@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { useApi, send, PageHead, Panel, Loading, ErrorBox, Empty } from "@/components/admin/ui";
+import { useApi, send, PageHead, Panel, Loading, ErrorBox, Empty, Pager, type Paged } from "@/components/admin/ui";
 
 type Item = {
   _id: string; filename: string; contentType: string;
@@ -11,7 +11,8 @@ type Item = {
 const kb = (n: number) => (n < 1024 * 1024 ? `${Math.round(n / 1024)} KB` : `${(n / 1024 / 1024).toFixed(1)} MB`);
 
 export default function MediaPage() {
-  const { data, error, loading, reload } = useApi<{ items: Item[] }>("/api/admin/media");
+  const [page, setPage] = useState(1);
+  const { data, error, loading, reload } = useApi<Paged<Item>>(`/api/admin/media?page=${page}`);
   const input = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
@@ -29,6 +30,7 @@ export default function MediaPage() {
         const json = await res.json();
         if (!res.ok) throw new Error(`${file.name}: ${json.error ?? "upload failed"}`);
       }
+      setPage(1);
       await reload();
     } catch (err) {
       setProblem(err instanceof Error ? err.message : "Upload failed");
@@ -116,6 +118,7 @@ export default function MediaPage() {
           ))}
         </div>
       )}
+      {data && <Pager data={data} onPage={setPage} noun="images" />}
     </>
   );
 }

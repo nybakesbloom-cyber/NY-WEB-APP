@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { money } from "@/lib/format";
-import { useApi, PageHead, Toolbar, Chip, Badge, Loading, ErrorBox, Empty } from "@/components/admin/ui";
+import { useApi, PageHead, Toolbar, Chip, Badge, Loading, ErrorBox, Empty, Pager, type Paged } from "@/components/admin/ui";
 
 type Row = {
   _id: string; slug: string; name: string; category: string;
@@ -18,11 +18,17 @@ export default function ProductsPage() {
   const [cat, setCat] = useState("all");
   const [q, setQ] = useState("");
   const [applied, setApplied] = useState("");
+  const [page, setPage] = useState(1);
 
-  const url = `/api/admin/products?${cat !== "all" ? `category=${cat}&` : ""}${
+  const url = `/api/admin/products?page=${page}&${cat !== "all" ? `category=${cat}&` : ""}${
     applied ? `q=${encodeURIComponent(applied)}` : ""
   }`;
-  const { data, error, loading, reload } = useApi<{ items: Row[] }>(url);
+  const { data, error, loading, reload } = useApi<Paged<Row>>(url);
+
+  const filter = (fn: () => void) => {
+    fn();
+    setPage(1);
+  };
 
   return (
     <>
@@ -34,12 +40,12 @@ export default function ProductsPage() {
 
       <Toolbar>
         {CATS.map((c) => (
-          <Chip key={c} active={cat === c} onClick={() => setCat(c)}>
+          <Chip key={c} active={cat === c} onClick={() => filter(() => setCat(c))}>
             {c === "all" ? "All" : c}
           </Chip>
         ))}
         <form
-          onSubmit={(e) => { e.preventDefault(); setApplied(q.trim()); }}
+          onSubmit={(e) => { e.preventDefault(); filter(() => setApplied(q.trim())); }}
           className="ml-auto flex gap-2"
         >
           <input
@@ -93,6 +99,7 @@ export default function ProductsPage() {
           ))}
         </div>
       )}
+      {data && <Pager data={data} onPage={setPage} noun="products" />}
     </>
   );
 }

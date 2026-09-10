@@ -1,7 +1,7 @@
 import { Transaction } from "@/server/models/Transaction";
 import { TXN_STATUSES } from "@/lib/orders";
 import { Order } from "@/server/models/Order";
-import { withAdmin, body, query, json, fail } from "@/server/api";
+import { withAdmin, body, query, json, fail, paging, findPaged } from "@/server/api";
 
 export const GET = withAdmin(async ({ req }) => {
   const q = query(req);
@@ -20,7 +20,11 @@ export const GET = withAdmin(async ({ req }) => {
     ];
   }
 
-  const items = await Transaction.find(filter).sort({ createdAt: -1 }).limit(200).lean();
+  const result = await findPaged(
+    () => Transaction.countDocuments(filter),
+    (skip, limit) => Transaction.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean(),
+    paging(req),
+  );
 
   // Money in, money out, and what is still owed.
   const [totals] = await Transaction.aggregate([
@@ -41,7 +45,7 @@ export const GET = withAdmin(async ({ req }) => {
   ]);
 
   return json({
-    items,
+    ...result,
     totals: {
       collected: totals?.collected ?? 0,
       refunded: totals?.refunded ?? 0,

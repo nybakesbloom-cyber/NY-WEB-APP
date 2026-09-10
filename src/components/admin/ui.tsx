@@ -253,3 +253,81 @@ export function Row({ href, children }: { href?: string; children: React.ReactNo
     <div className={cls}>{children}</div>
   );
 }
+
+/** Shape every paginated admin endpoint returns. */
+export type Paged<T> = {
+  items: T[];
+  page: number;
+  pages: number;
+  total: number;
+  limit: number;
+  from: number;
+  to: number;
+};
+
+export function Pager({
+  data,
+  onPage,
+  noun = "items",
+}: {
+  data: Pick<Paged<unknown>, "page" | "pages" | "total" | "from" | "to">;
+  onPage: (page: number) => void;
+  noun?: string;
+}) {
+  if (data.total === 0) return null;
+
+  // A window of pages around the current one, so 200 pages do not fill the row.
+  const span = 2;
+  const numbers: (number | "gap")[] = [];
+  for (let n = 1; n <= data.pages; n++) {
+    if (n === 1 || n === data.pages || Math.abs(n - data.page) <= span) numbers.push(n);
+    else if (numbers[numbers.length - 1] !== "gap") numbers.push("gap");
+  }
+
+  return (
+    <nav className="mt-5 flex flex-wrap items-center justify-between gap-3" aria-label="Pagination">
+      <p className="text-[0.8rem] text-brand-700/70">
+        <strong className="text-brand-900">{data.from}–{data.to}</strong> of {data.total} {noun}
+      </p>
+
+      {data.pages > 1 && (
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            onClick={() => onPage(data.page - 1)}
+            disabled={data.page <= 1}
+            className="rounded-lg border border-brand-900/12 bg-white px-3 py-1.5 text-[0.8rem] font-semibold text-brand-800 transition hover:border-gold-500 disabled:opacity-35"
+          >
+            ← Prev
+          </button>
+
+          {numbers.map((n, i) =>
+            n === "gap" ? (
+              <span key={`gap${i}`} className="px-1.5 text-brand-700/45">…</span>
+            ) : (
+              <button
+                key={n}
+                onClick={() => onPage(n)}
+                aria-current={n === data.page ? "page" : undefined}
+                className={`min-w-9 rounded-lg px-3 py-1.5 text-[0.8rem] font-semibold transition ${
+                  n === data.page
+                    ? "bg-brand-800 text-gold-100"
+                    : "border border-brand-900/12 bg-white text-brand-800 hover:border-gold-500"
+                }`}
+              >
+                {n}
+              </button>
+            ),
+          )}
+
+          <button
+            onClick={() => onPage(data.page + 1)}
+            disabled={data.page >= data.pages}
+            className="rounded-lg border border-brand-900/12 bg-white px-3 py-1.5 text-[0.8rem] font-semibold text-brand-800 transition hover:border-gold-500 disabled:opacity-35"
+          >
+            Next →
+          </button>
+        </div>
+      )}
+    </nav>
+  );
+}
