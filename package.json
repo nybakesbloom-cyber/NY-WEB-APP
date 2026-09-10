@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "seed": "node --no-warnings --experimental-strip-types scripts/seed.ts"
+    "seed": "node --no-warnings --experimental-strip-types scripts/seed.ts",
+    "make-admin": "node --no-warnings --experimental-strip-types scripts/make-admin.ts"
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",

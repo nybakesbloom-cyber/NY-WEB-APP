@@ -70,6 +70,20 @@ dependency — no S3, no Cloudinary, nothing to configure before an upload works
 Product photography sits well under Mongo's 16 MB document limit; the upload cap
 is 5 MB.
 
+**Adding a staff account by hand.** Passwords are stored as a bcrypt hash, so a
+document typed straight into Atlas will never sign in. `npm run make-admin`
+prints a ready-to-paste document with the hash already computed:
+
+```bash
+read -rs "?Password: " ADMIN_PASSWORD; echo
+ADMIN_EMAIL=you@shop.com ADMIN_PASSWORD="$ADMIN_PASSWORD" npm run make-admin
+```
+
+It talks to nothing — no database, no network — it only prints. Paste the JSON
+into Atlas → Browse Collections → `adminusers` → Insert Document, or use the
+`mongosh` line it also prints. The hash is salted, so the same password yields a
+different string each run; that is expected.
+
 **Getting data in without a terminal.** A fresh database has no staff account,
 so `/admin/login` offers to create the first one — and refuses the moment any
 account exists, so it closes itself permanently after one use. From there,
