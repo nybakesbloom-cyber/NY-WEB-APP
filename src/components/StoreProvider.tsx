@@ -9,6 +9,14 @@ export type Store = {
   occasions: Occasion[];
   settings: Settings;
   announcements: string[];
+  header: {
+    searchPlaceholder?: string;
+    cities?: string[];
+    cutoffLabel?: string;
+    cutoffRolledLabel?: string;
+    cartLabel?: string;
+  };
+  theme: Record<string, string>;
 };
 
 type StoreValue = Store & {

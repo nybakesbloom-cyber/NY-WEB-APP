@@ -8,7 +8,7 @@ import Logo from "./Logo";
 import { useStore } from "./StoreProvider";
 import { useCart } from "./CartProvider";
 
-const CITIES = ["Bengaluru", "Mumbai", "Delhi NCR", "Hyderabad", "Chennai", "Pune", "Kolkata"];
+const DEFAULT_CITIES = ["Bengaluru", "Mumbai", "Delhi NCR", "Hyderabad", "Chennai", "Pune", "Kolkata"];
 
 function CartIcon({ className = "" }: { className?: string }) {
   return (
@@ -21,12 +21,13 @@ function CartIcon({ className = "" }: { className?: string }) {
 }
 
 export default function Header() {
-  const { categories, occasions, announcements } = useStore();
+  const { categories, occasions, announcements, header } = useStore();
+  const CITIES = header.cities?.length ? header.cities : DEFAULT_CITIES;
   const { count, ready, openDrawer } = useCart();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
   const [menu, setMenu] = useState<"cat" | "occ" | null>(null);
-  const [city, setCity] = useState(CITIES[0]);
+  const [city, setCity] = useState("");
   const [q, setQ] = useState("");
   const router = useRouter();
   const pathname = usePathname();
@@ -110,7 +111,7 @@ export default function Header() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search cakes, roses, hampers…"
+                placeholder={header.searchPlaceholder || "Search cakes, roses, hampers…"}
                 className="field pl-10"
                 aria-label="Search products"
               />
@@ -134,7 +135,7 @@ export default function Header() {
               <circle cx="12" cy="10" r="2.4" />
             </svg>
             <select
-              value={city}
+              value={city || CITIES[0]}
               onChange={(e) => setCity(e.target.value)}
               className="cursor-pointer border-0 bg-transparent pr-1 text-sm font-medium outline-none"
               aria-label="Delivery city"
@@ -151,7 +152,7 @@ export default function Header() {
             className="relative ml-auto flex items-center gap-2 rounded-full border border-brand-800/12 bg-white px-3.5 py-2 text-sm font-semibold text-brand-800 transition hover:-translate-y-0.5 hover:border-gold-500 hover:shadow-[0_10px_22px_-14px_rgba(11,61,46,0.9)] md:ml-2"
           >
             <CartIcon className="h-5 w-5" />
-            <span className="hidden sm:inline">Cart</span>
+            <span className="hidden sm:inline">{header.cartLabel || "Cart"}</span>
             {ready && count > 0 && (
               <span
                 key={count}
@@ -207,7 +208,7 @@ export default function Header() {
               <circle cx="12" cy="12" r="9" />
               <path d="M12 7v5l3 2" strokeLinecap="round" />
             </svg>
-            <Countdown />
+            <Countdown labels={header} />
           </span>
         </div>
       </div>
@@ -220,7 +221,7 @@ export default function Header() {
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder="Search cakes, roses, hampers…"
+                placeholder={header.searchPlaceholder || "Search cakes, roses, hampers…"}
                 className="field"
                 aria-label="Search products"
               />

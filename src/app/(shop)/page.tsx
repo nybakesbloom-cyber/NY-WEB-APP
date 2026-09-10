@@ -9,7 +9,7 @@ import FlowStrip from "@/components/FlowStrip";
 import HeroStory from "@/components/HeroStory";
 import ProcessScroll from "@/components/ProcessScroll";
 import { filterProducts } from "@/lib/catalog";
-import { getProducts, getCategories, getOccasions, getProcess, getContent } from "@/server/queries";
+import { getProducts, getCategories, getOccasions, getProcess, getContent, getSections } from "@/server/queries";
 import type { HeroContent } from "@/components/HeroStory";
 
 function PromiseIcon({ name }: { name: string }) {
@@ -50,7 +50,7 @@ type Promise_ = { icon: string; title: string; body: string };
 type Review = { name: string; city: string; rating: number; text: string };
 
 export default async function HomePage() {
-  const [products, CATEGORIES, OCCASIONS, steps, hero, promiseBlock, reviewBlock] =
+  const [products, CATEGORIES, OCCASIONS, steps, hero, promiseBlock, reviewBlock, S, cta] =
     await Promise.all([
       getProducts(),
       getCategories(),
@@ -59,7 +59,12 @@ export default async function HomePage() {
       getContent<Partial<HeroContent>>("hero", {}),
       getContent<{ items: Promise_[] }>("promises", { items: [] }),
       getContent<{ items: Review[] }>("reviews", { items: [] }),
+      getSections(),
+      getContent<Record<string, string>>("cta", {}),
     ]);
+
+  // Falls back to the shipped copy if a heading has been cleared in the admin.
+  const t = (key: string, fallback: string) => S[key] || fallback;
 
   const PROMISES = promiseBlock.items;
   const REVIEWS = reviewBlock.items;
@@ -78,11 +83,11 @@ export default async function HomePage() {
       <section id="start" className="wrap scroll-mt-[150px] py-16">
         <Reveal>
           <SectionHead
-            eyebrow="Start here"
-            title="Five things, done properly"
-            sub="We deliberately keep the list short. Everything below is made or arranged in our own kitchens and studios."
+            eyebrow={t("categoriesEyebrow", "Start here")}
+            title={t("categoriesTitle", "Five things, done properly")}
+            sub={t("categoriesSub", "We deliberately keep the list short.")}
             href="/shop"
-            hrefLabel="Browse everything"
+            hrefLabel={t("categoriesLink", "Browse everything")}
           />
         </Reveal>
 
@@ -117,9 +122,9 @@ export default async function HomePage() {
       <section className="overflow-hidden border-y border-brand-800/10 bg-white py-12">
         <div className="wrap mb-7">
           <Reveal>
-            <p className="eyebrow">Leaving the kitchen today</p>
+            <p className="eyebrow">{t("flowEyebrow", "Leaving the kitchen today")}</p>
             <h2 className="mt-2 font-display text-[1.6rem] font-semibold tracking-tight text-brand-900 sm:text-[2rem]">
-              A live look at what is being boxed right now
+              {t("flowTitle", "A live look at what is being boxed right now")}
             </h2>
           </Reveal>
         </div>
@@ -150,15 +155,15 @@ export default async function HomePage() {
       </section>
 
       {/* ---------------------------------------- PINNED PROCESS SCRUB */}
-      <ProcessScroll steps={steps} />
+      <ProcessScroll steps={steps} headings={{ eyebrow: S.processEyebrow, title: S.processTitle }} />
 
       {/* ----------------------------------------------------- BESTSELLERS */}
       <section className="wrap py-16">
         <Reveal>
           <SectionHead
-            eyebrow="Ordered most"
-            title="What people keep coming back for"
-            sub="Ranked by repeat orders, not by margin."
+            eyebrow={t("bestsellersEyebrow", "Ordered most")}
+            title={t("bestsellersTitle", "What people keep coming back for")}
+            sub={t("bestsellersSub", "Ranked by repeat orders, not by margin.")}
             href="/shop"
           />
         </Reveal>
@@ -184,9 +189,9 @@ export default async function HomePage() {
           <Reveal>
             <SectionHead
               tone="dark"
-              eyebrow="Tell us the reason"
-              title="Shop by occasion"
-              sub="Each one filters to what we would actually send. Sympathy orders skip the ribbons and go out first on the route."
+              eyebrow={t("occasionsEyebrow", "Tell us the reason")}
+              title={t("occasionsTitle", "Shop by occasion")}
+              sub={t("occasionsSub", "Each one filters to what we would actually send.")}
             />
           </Reveal>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -213,9 +218,9 @@ export default async function HomePage() {
       <section className="wrap py-16">
         <Reveal>
           <SectionHead
-            eyebrow="From the kitchen"
-            title="Cakes"
-            sub="Every one available eggless. Name piping is free; we just need it typed at checkout."
+            eyebrow={t("cakesEyebrow", "From the kitchen")}
+            title={t("cakesTitle", "Cakes")}
+            sub={t("cakesSub", "Every one available eggless.")}
             href="/shop?category=cakes"
           />
         </Reveal>
@@ -232,9 +237,9 @@ export default async function HomePage() {
       <section className="wrap pb-16">
         <Reveal>
           <SectionHead
-            eyebrow="From the market"
-            title="Flowers"
-            sub="Graded by head size before wrapping. If a variety is short on the day we call you before substituting."
+            eyebrow={t("flowersEyebrow", "From the market")}
+            title={t("flowersTitle", "Flowers")}
+            sub={t("flowersSub", "Graded by head size before wrapping.")}
             href="/shop?category=flowers"
           />
         </Reveal>
@@ -251,7 +256,7 @@ export default async function HomePage() {
       <section className="border-y border-brand-800/10 bg-white py-16">
         <div className="wrap">
           <Reveal>
-            <SectionHead center eyebrow="Unedited" title="What the reviews actually say" />
+            <SectionHead center eyebrow={t("reviewsEyebrow", "Unedited")} title={t("reviewsTitle", "What the reviews actually say")} sub={S.reviewsSub || undefined} />
           </Reveal>
           <div className="grid gap-5 md:grid-cols-3">
             {REVIEWS.map((r, i) => (
@@ -289,28 +294,27 @@ export default async function HomePage() {
               }}
             />
             <div className="relative">
-              <p className="eyebrow text-gold-400">Never miss one again</p>
+              <p className="eyebrow text-gold-400">{cta.eyebrow || "Never miss one again"}</p>
               <h2 className="mx-auto mt-3 max-w-2xl font-display text-[1.9rem] font-semibold leading-tight text-gold-50 sm:text-[2.4rem]">
-                We will remind you the week before the date.
+                {cta.title || "We will remind you the week before the date."}
               </h2>
               <p className="mx-auto mt-4 max-w-xl text-[0.95rem] leading-relaxed text-gold-100/70">
-                Add a birthday or anniversary once. We send one message seven days out and another on
-                the morning of — nothing else, ever.
+                {cta.body || "Add a birthday or anniversary once."}
               </p>
               <form className="mx-auto mt-8 flex max-w-md flex-col gap-3 sm:flex-row">
                 <input
                   type="email"
                   required
-                  placeholder="you@example.com"
+                  placeholder={cta.placeholder || "you@example.com"}
                   aria-label="Email address"
                   className="field flex-1"
                 />
                 <button type="submit" className="btn btn-gold px-7 py-3">
-                  Set a reminder
+                  {cta.button || "Set a reminder"}
                 </button>
               </form>
               <p className="mt-3 text-[0.72rem] text-gold-100/45">
-                Demo storefront — this form does not send anything.
+                {cta.note || "Demo storefront — this form does not send anything."}
               </p>
             </div>
           </div>

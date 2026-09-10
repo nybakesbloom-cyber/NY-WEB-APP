@@ -97,18 +97,41 @@ export async function getAnnouncements() {
   return items;
 }
 
+export type Sections = Record<string, string>;
+
+export async function getSections() {
+  return getContent<Sections>("sections", {});
+}
+
+export async function getTheme() {
+  return getContent<Record<string, string>>("theme", {});
+}
+
+export async function getHeader() {
+  return getContent<{
+    searchPlaceholder?: string;
+    cities?: string[];
+    cutoffLabel?: string;
+    cutoffRolledLabel?: string;
+    cartLabel?: string;
+  }>("header", {});
+}
+
 export async function getSettings(): Promise<Settings> {
   return { ...DEFAULT_SETTINGS, ...(await getContent<Partial<Settings>>("settings", {})) };
 }
 
 /** Everything the client bundle needs, fetched once in the root layout. */
 export async function getStore() {
-  const [products, categories, occasions, settings, announcements] = await Promise.all([
-    getProducts(),
-    getCategories(),
-    getOccasions(),
-    getSettings(),
-    getAnnouncements(),
-  ]);
-  return { products, categories, occasions, settings, announcements };
+  const [products, categories, occasions, settings, announcements, header, theme] =
+    await Promise.all([
+      getProducts(),
+      getCategories(),
+      getOccasions(),
+      getSettings(),
+      getAnnouncements(),
+      getHeader(),
+      getTheme(),
+    ]);
+  return { products, categories, occasions, settings, announcements, header, theme };
 }

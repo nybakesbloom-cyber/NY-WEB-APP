@@ -14,7 +14,13 @@ const SCENES: SceneName[] = ["order", "market", "kitchen", "boxed", "doorstep"];
  * marker in CSS, and advances the phase copy in React. Under
  * `prefers-reduced-motion` the whole thing renders as a plain stacked list.
  */
-export default function ProcessScroll({ steps }: { steps: ProcessStep[] }) {
+export default function ProcessScroll({
+  steps,
+  headings = {},
+}: {
+  steps: ProcessStep[];
+  headings?: { eyebrow?: string; title?: string };
+}) {
   const PROCESS = steps;
   const N = PROCESS.length;
 
@@ -88,9 +94,9 @@ export default function ProcessScroll({ steps }: { steps: ProcessStep[] }) {
         <div className="wrap relative flex h-full flex-col pb-5 pt-[92px] sm:pt-[112px] lg:pt-[168px]">
           <header className="flex items-baseline justify-between gap-4">
             <div>
-              <p className="eyebrow text-gold-400">One order, end to end</p>
+              <p className="eyebrow text-gold-400">{headings.eyebrow || "One order, end to end"}</p>
               <h2 className="mt-1.5 font-display text-[1.5rem] font-semibold tracking-tight text-gold-50 sm:text-[2rem]">
-                How it is actually made
+                {headings.title || "How it is actually made"}
               </h2>
             </div>
             <Link

@@ -26,7 +26,13 @@ function subscribe(onChange: () => void) {
   return () => window.clearInterval(id);
 }
 
-export default function Countdown({ className = "" }: { className?: string }) {
+export default function Countdown({
+  className = "",
+  labels = {},
+}: {
+  className?: string;
+  labels?: { cutoffLabel?: string; cutoffRolledLabel?: string };
+}) {
   // The server's clock is not the shopper's, so it renders the static line and
   // the live one takes over after hydration.
   const value = useSyncExternalStore(subscribe, snapshot, () => null);
@@ -39,7 +45,9 @@ export default function Countdown({ className = "" }: { className?: string }) {
 
   return (
     <span className={className}>
-      {rolled === "1" ? "Next same-day slot in " : "Same-day cut-off in "}
+      {rolled === "1"
+        ? labels.cutoffRolledLabel || "Next same-day slot in "
+        : labels.cutoffLabel || "Same-day cut-off in "}
       <span className="font-mono font-bold tabular-nums text-gold-300">{clock}</span>
     </span>
   );

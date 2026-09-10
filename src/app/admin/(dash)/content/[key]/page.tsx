@@ -2,55 +2,44 @@
 
 import Link from "next/link";
 import { use, useState } from "react";
+import { CONTENT_SCHEMA } from "@/lib/contentSchema";
+import SchemaForm from "@/components/admin/SchemaForm";
 import { useApi, send, PageHead, Panel, Field, Loading, ErrorBox } from "@/components/admin/ui";
 
 type Block = { key: string; label: string; data: Record<string, unknown> };
 
-/**
- * Blocks whose shape is a flat list of strings get a friendly line-per-item
- * editor. Everything else is edited as JSON, which is honest about what it is
- * rather than pretending a generated form can cover every shape.
- */
-const STRING_LISTS: Record<string, { field: string; label: string; hint: string }> = {
-  announcements: { field: "items", label: "Announcements", hint: "One per line. They scroll across the top of every page." },
-};
-
 export default function ContentEditor({ params }: { params: Promise<{ key: string }> }) {
   const { key } = use(params);
   const { data, error, loading, reload } = useApi<{ item: Block }>(`/api/admin/content/${key}`);
+  const schema = CONTENT_SCHEMA[key];
 
+  const [draft, setDraft] = useState<Record<string, unknown> | null>(null);
   const [text, setText] = useState("");
+  const [raw, setRaw] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
-  const simple = STRING_LISTS[key];
-
-  // Load the editor from the payload the first time it arrives, and again
-  // after a save-and-reload, without synchronising through an effect.
+  // Seed the editor from the payload without synchronising through an effect.
   const [seededFrom, setSeededFrom] = useState<Block | null>(null);
   if (data?.item && data.item !== seededFrom) {
     setSeededFrom(data.item);
-    setText(
-      simple
-        ? ((data.item.data[simple.field] ?? []) as string[]).join("\n")
-        : JSON.stringify(data.item.data, null, 2),
-    );
+    setDraft(data.item.data ?? {});
+    setText(JSON.stringify(data.item.data ?? {}, null, 2));
   }
 
   if (loading) return <Loading />;
   if (error) return <ErrorBox message={error} onRetry={reload} />;
-  if (!data) return null;
+  if (!data || draft === null) return <Loading />;
 
   async function save() {
     setBusy(true);
     setProblem(null);
     setSaved(false);
     try {
-      let payload: unknown;
-      if (simple) {
-        payload = { [simple.field]: text.split("\n").map((l) => l.trim()).filter(Boolean) };
-      } else {
+      const usingJson = raw || !schema;
+      let payload: unknown = draft;
+      if (usingJson) {
         try {
           payload = JSON.parse(text);
         } catch (err) {
@@ -61,6 +50,7 @@ export default function ContentEditor({ params }: { params: Promise<{ key: strin
       }
       await send(`/api/admin/content/${key}`, "PUT", { data: payload });
       setSaved(true);
+      setSeededFrom(null); // force a re-seed from the saved payload
       await reload();
     } catch (err) {
       setProblem(err instanceof Error ? err.message : "Could not save");
@@ -69,15 +59,34 @@ export default function ContentEditor({ params }: { params: Promise<{ key: strin
     }
   }
 
+  function toggleRaw() {
+    if (!raw) setText(JSON.stringify(draft, null, 2));
+    else {
+      try {
+        setDraft(JSON.parse(text));
+      } catch {
+        setProblem("Fix the JSON before switching back to the form.");
+        return;
+      }
+    }
+    setRaw(!raw);
+    setProblem(null);
+  }
+
   return (
     <>
-      <PageHead title={data.item.label || key} sub={simple ? simple.hint : "Edit the block below, then save."}>
+      <PageHead title={schema?.label ?? data.item.label ?? key} sub={schema?.where}>
         <Link href="/admin/content" className="btn btn-outline px-4 py-2 text-[0.82rem]">
-          ← All content
+          ← All sections
         </Link>
         <Link href="/" target="_blank" className="btn btn-outline px-4 py-2 text-[0.82rem]">
           View shop ↗
         </Link>
+        {schema && (
+          <button onClick={toggleRaw} className="btn btn-outline px-4 py-2 text-[0.82rem]">
+            {raw ? "Back to the form" : "Edit as JSON"}
+          </button>
+        )}
         <button onClick={save} disabled={busy} className="btn btn-gold px-5 py-2 text-[0.82rem]">
           {busy ? "Saving…" : "Save"}
         </button>
@@ -95,15 +104,25 @@ export default function ContentEditor({ params }: { params: Promise<{ key: strin
       )}
 
       <Panel>
-        <Field label={simple ? simple.label : "Content"} hint={simple ? undefined : "JSON. Keep the shape — the site reads these keys by name."}>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            spellCheck={!!simple}
-            rows={simple ? 10 : 26}
-            className="field resize-y font-mono text-[0.8rem] leading-relaxed"
-          />
-        </Field>
+        {schema && !raw ? (
+          <SchemaForm fields={schema.fields} value={draft} onChange={setDraft} />
+        ) : (
+          <Field
+            label="Content"
+            hint={
+              schema
+                ? "The form covers everything here — JSON is for bulk edits."
+                : "This block has no form yet, so it is edited as JSON. Keep the shape."
+            }
+          >
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              rows={26}
+              className="field resize-y font-mono text-[0.8rem] leading-relaxed"
+            />
+          </Field>
+        )}
       </Panel>
     </>
   );

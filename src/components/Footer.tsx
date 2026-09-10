@@ -6,6 +6,7 @@ type FooterContent = {
   blurb: string;
   cities: string[];
   help: string[];
+  socials?: string[];
   legal: string;
 };
 
@@ -29,7 +30,7 @@ export default async function Footer() {
 {content.blurb}
           </p>
           <div className="mt-6 flex gap-2.5">
-            {["Instagram", "Facebook", "X", "WhatsApp"].map((s) => (
+            {(content.socials?.length ? content.socials : ["Instagram", "Facebook", "X", "WhatsApp"]).map((s) => (
               <span
                 key={s}
                 className="grid h-9 w-9 place-items-center rounded-full border border-gold-500/40 text-[0.62rem] font-bold text-gold-300"
