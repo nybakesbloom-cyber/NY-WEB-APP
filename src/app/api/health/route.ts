@@ -69,14 +69,27 @@ export async function GET() {
       ...(empty
         ? { problem: "Connected, but the database is empty.", fix: "Run `npm run seed` against this MONGODB_URI." }
         : {}),
+      ...(db.name === "test"
+        ? {
+            warning:
+              "MONGODB_URI has no database name, so the driver fell back to 'test'. Add it before the '?': …mongodb.net/ny_bakes_bloom?retryWrites=true&w=majority",
+          }
+        : {}),
       env: { MONGODB_URI: true, ADMIN_SESSION_SECRET: secretSet },
     });
   } catch (err) {
     const code = (err as { code?: number }).code;
     const message = safeMessage(err);
 
-    const fix =
-      code === 8000 || /bad auth|authentication failed/i.test(message)
+    // Atlas reports an unreachable cluster as a server-selection failure whose
+    // text names the IP allowlist — match that explicitly rather than falling
+    // through to a generic message.
+    const blockedByAllowlist =
+      /whitelist|not authorized to connect|Could not connect to any servers/i.test(message);
+
+    const fix = blockedByAllowlist
+      ? "Vercel's IP addresses are not in the Atlas allowlist. In Atlas → Network Access → Add IP Address → Allow access from anywhere (0.0.0.0/0). Vercel has no fixed egress IPs, so a narrower range will not work."
+      : code === 8000 || /bad auth|authentication failed/i.test(message)
         ? "The username or password in MONGODB_URI is wrong. Copy the string from Atlas → Connect → Drivers, replace <db_password>, and percent-encode any special characters (@ is %40)."
         : /ENOTFOUND|querySrv|ESERVFAIL/i.test(message)
           ? "The cluster hostname does not resolve. Check it against Atlas → Connect → Drivers."
