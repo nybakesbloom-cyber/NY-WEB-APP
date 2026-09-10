@@ -238,6 +238,26 @@ If you later want the speed back, add ISR (`export const revalidate`) plus a
 `revalidatePath` call in the product write routes — do not reintroduce
 `generateStaticParams` over the database.
 
+### Diagnosing a deployment
+
+`GET /api/health` reports whether the running deployment can reach its database.
+Next hides server errors behind a digest in production, so without it a
+misconfigured `MONGODB_URI` is just an opaque 500.
+
+It never echoes credentials — only the host, the database name, the driver's
+error code and what to do about it:
+
+```json
+{ "ok": false,
+  "database": { "host": "cluster0.xxxx.mongodb.net", "state": "failed" },
+  "problem": "bad auth : Authentication failed.",
+  "code": 8000,
+  "fix": "The username or password in MONGODB_URI is wrong…" }
+```
+
+`"ok": true` means connected *and* seeded; it reports counts so an empty
+database is distinguishable from a broken connection.
+
 ## Not wired up
 
 - **No payment gateway.** Checkout creates a real order and a transaction, but
