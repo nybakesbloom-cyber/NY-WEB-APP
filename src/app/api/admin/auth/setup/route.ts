@@ -3,6 +3,7 @@ import { connectDB } from "@/server/db";
 import { AdminUser } from "@/server/models/AdminUser";
 import { createSession } from "@/server/session";
 import { fail, json } from "@/server/api";
+import { envAdmin } from "@/server/envAdmin";
 
 /**
  * First-run bootstrap. A brand-new database has no staff account, so there
@@ -10,6 +11,8 @@ import { fail, json } from "@/server/api";
  * moment any account exists, so this closes itself permanently after one use.
  */
 async function isFirstRun() {
+  // An environment login is already a way in, so setup should not offer.
+  if (envAdmin()) return false;
   await connectDB();
   return (await AdminUser.estimatedDocumentCount()) === 0;
 }

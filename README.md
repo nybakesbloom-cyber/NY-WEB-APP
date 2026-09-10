@@ -70,6 +70,26 @@ dependency — no S3, no Cloudinary, nothing to configure before an upload works
 Product photography sits well under Mongo's 16 MB document limit; the upload cap
 is 5 MB.
 
+**Signing in from environment variables.** A staff login can be defined without
+any database record at all, which means a fresh deployment can be signed into
+before anything is seeded, and it keeps working if the database account is lost:
+
+```bash
+ADMIN_LOGIN_EMAIL=you@shop.com
+ADMIN_LOGIN_PASSWORD=aPasswordYouChoose        # or, better:
+ADMIN_LOGIN_PASSWORD_HASH=$2b$12$…             # from `npm run make-admin`
+ADMIN_LOGIN_NAME=Store owner                   # optional
+ADMIN_LOGIN_ROLE=owner                         # owner | manager | staff
+```
+
+Prefer the hash on a hosted deployment: a plain password is readable by anyone
+who can open the hosting dashboard, whereas the hash is not.
+
+This account is checked **before** the database, so it works even when Mongo is
+unreachable, and database accounts continue to work alongside it. Leave the
+variables unset and login behaves exactly as before. While one is configured,
+the first-run setup form does not appear — there is already a way in.
+
 **Adding a staff account by hand.** Passwords are stored as a bcrypt hash, so a
 document typed straight into Atlas will never sign in. `npm run make-admin`
 prints a ready-to-paste document with the hash already computed:

@@ -2,11 +2,10 @@ import bcrypt from "bcryptjs";
 import { connectDB } from "@/server/db";
 import { AdminUser } from "@/server/models/AdminUser";
 import { createSession } from "@/server/session";
+import { checkEnvAdmin } from "@/server/envAdmin";
 import { fail, json } from "@/server/api";
 
 export async function POST(req: Request) {
-  await connectDB();
-
   let payload: { email?: string; password?: string };
   try {
     payload = await req.json();
@@ -18,6 +17,19 @@ export async function POST(req: Request) {
   const password = payload.password ?? "";
   if (!email || !password) return fail("Email and password are required");
 
+  // The environment account is checked first so it keeps working even when the
+  // database is unreachable or its record has been lost.
+  const fromEnv = await checkEnvAdmin(email, password);
+  if (fromEnv) {
+    await createSession(fromEnv);
+    return json({
+      ok: true,
+      via: "env",
+      user: { email: fromEnv.email, name: fromEnv.name, role: fromEnv.role },
+    });
+  }
+
+  await connectDB();
   const user = await AdminUser.findOne({ email });
   // Same message and roughly the same work either way, so the response does not
   // reveal whether the address exists.
